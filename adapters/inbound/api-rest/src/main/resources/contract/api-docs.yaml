@@ -1,32 +1,35 @@
 openapi: 3.0.3
 info:
   title: Simulador de Crédito
-  description: 'API para simulação de empréstimos com base em valor, idade e prazo.'
+  description: |
+    API para simulação de empréstimos com base em valor, idade e prazo.  Permite simulações individuais e em lote, com retorno de detalhes financeiros como parcelas, juros e total a pagar.
   version: 1.0.0
 servers:
   - url: 'http://localhost:7000'
-    description: Servidor local
+    description: Servidor local para testes
 paths:
   /simulations:
     post:
       summary: Simular empréstimo
-      description: 'Retorna o valor total, parcelas e juros com base no valor, idade e prazo.'
+      description: |
+        Realiza uma simulação de crédito com base no valor, idade do cliente e prazo em meses. A taxa de juros é determinada de acordo com a faixa etária do cliente.
       operationId: simulateLoan
       requestBody:
         required: true
+        description: Parâmetros para a simulação de empréstimo
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LoanSimulationRequest'
       responses:
         '200':
-          description: Resultado da simulação
+          description: Simulação realizada com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoanSimulationResponse'
         '400':
-          description: Erro de validação
+          description: Requisição inválida (dados incorretos ou faltando)
           content:
             application/json:
               schema:
@@ -39,61 +42,62 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
         - credit-simulation
-
   /simulations/bulk:
     post:
       summary: Iniciar simulações em lote
-      description: Inicia o processamento assíncrono de simulações em lote e retorna um ID para consulta posterior.
+      description: |
+        Recebe uma lista de simulações para processamento assíncrono. Retorna um ID de controle para posterior verificação do status.
       operationId: startBulkSimulation
       requestBody:
         required: true
+        description: Lista de simulações a serem processadas
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/BulkLoanSimulationRequest'
       responses:
         '202':
-          description: Simulações recebidas com sucesso. Retorna o ID do lote.
+          description: Simulações recebidas para processamento
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BulkSimulationInitResponse'
         '400':
-          description: Erro de validação
+          description: Requisição inválida
         '500':
           description: Erro interno no servidor
       tags:
         - credit-simulation
-
-  /simulations/bulk/{bulkId}:
+  '/simulations/bulk/{bulkId}':
     get:
       summary: Consultar status de simulação em lote
-      description: Consulta o progresso ou resultado final de uma simulação em lote.
+      description: |
+        Retorna o status atual de processamento de uma simulação em lote, incluindo resultados parciais ou finais.
       operationId: getBulkSimulationStatus
       parameters:
         - name: bulkId
           in: path
           required: true
-          description: ID da simulação em lote
+          description: Identificador da simulação em lote (UUID)
           schema:
             type: string
             format: uuid
       responses:
         '200':
-          description: Status atual da simulação em lote
+          description: Status da simulação em lote recuperado com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BulkSimulationStatusResponse'
         '404':
-          description: Simulação em lote não encontrada
+          description: ID de simulação em lote não encontrado
       tags:
         - credit-simulation
-
 components:
   schemas:
     LoanSimulationRequest:
       type: object
+      description: Requisição para simular um empréstimo individual
       properties:
         loan_amount:
           $ref: '#/components/schemas/Money'
@@ -101,39 +105,52 @@ components:
           $ref: '#/components/schemas/CustomerInfoRequest'
         months:
           type: integer
+          description: Prazo de pagamento em meses
         policy_type:
           type: string
-          enum: [fixed, age]
+          enum:
+            - fixed
+            - age
+          description: Tipo de política de taxa de juros aplicada
+          default: fixed
         source_currency:
           type: string
+          description: Moeda original da simulação
+          default: BRL
+          example: BRL
         target_currency:
           type: string
+          description: Moeda de destino para conversão (se aplicável)
+          default: BRL
+          example: USD
       required:
         - loan_amount
         - customer_info
         - months
-        - policy_type
-
     BulkLoanSimulationRequest:
       type: object
+      description: Requisição para simulações de crédito em lote
       properties:
         simulations:
           type: array
           items:
             $ref: '#/components/schemas/LoanSimulationRequest'
+          description: Lista de simulações a serem processadas
       required:
         - simulations
-
     LoanSimulationResponse:
       type: object
+      description: Resposta com os dados calculados da simulação
       properties:
         source:
           type: object
+          description: Informações da simulação na moeda de origem
           properties:
             amount:
               $ref: '#/components/schemas/Money'
         target:
           type: object
+          description: Informações convertidas para a moeda de destino
           properties:
             converted_amount:
               $ref: '#/components/schemas/Money'
@@ -145,33 +162,45 @@ components:
               $ref: '#/components/schemas/Money'
             annual_interest_rate:
               $ref: '#/components/schemas/Rate'
-
     BulkSimulationInitResponse:
       type: object
+      description: Resposta com o ID de controle da simulação em lote
       properties:
         bulk_id:
           type: string
           format: uuid
+          description: Identificador único da simulação em lote
         status:
           type: string
-          enum: [RECEIVED, PROCESSING]
+          enum:
+            - RECEIVED
+            - PROCESSING
+            - COMPLETED
+          description: Status inicial do processamento
+          example: PROCESSING
       required:
         - bulk_id
         - status
-
     BulkSimulationStatusResponse:
       type: object
+      description: Resposta com o status e resultados da simulação em lote
       properties:
         bulk_id:
           type: string
           format: uuid
         status:
           type: string
-          enum: [RECEIVED, PROCESSING, COMPLETED, FAILED]
+          enum:
+            - PROCESSING
+            - COMPLETED
+            - FAILED
+          example: PROCESSING
         processed:
           type: integer
+          description: Quantidade de simulações já processadas
         total:
           type: integer
+          description: Total de simulações na requisição
         results:
           type: array
           items:
@@ -181,44 +210,56 @@ components:
         - status
         - processed
         - total
-
     CustomerInfoRequest:
       type: object
+      description: Informações do cliente para simulação
       properties:
         birth_date:
           type: string
           format: date
+          description: Data de nascimento do cliente (utilizada para cálculo de faixa etária)
         email:
           type: string
           format: email
+          description: E-mail do cliente (opcional para retorno ou notificação)
+          example: user@email.com
+          pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
       required:
         - birth_date
         - email
-
     Money:
       type: object
+      description: Representação de valor monetário
       properties:
         amount:
           type: string
+          description: Valor numérico com ponto flutuante (representado como string)
+          pattern: '^-?\d+(\.\d{2})?$'
+          example: '1000.00'
         currency:
           type: string
+          description: 'Código da moeda no padrão ISO 4217 (ex: USD, BRL)'
+          example: BRL
       required:
         - amount
         - currency
-
     Rate:
       type: string
       pattern: '^(?!0\.00$)(?:[1-9]\d*(\.\d{2})?|0\.\d*[1-9]\d*)$'
-
+      description: Taxa de juros percentual anual representada como string com 2 casas decimais
     ErrorResponse:
       type: object
+      description: Estrutura padrão para mensagens de erro
       properties:
         type:
           type: string
+          description: 'Tipo do erro (ex: VALIDATION_ERROR, INTERNAL_ERROR)'
         message:
           type: string
+          description: Mensagem explicativa do erro
         details:
           type: object
+          description: Campo opcional com informações detalhadas do erro
       required:
         - type
         - message

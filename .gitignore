@@ -50,3 +50,5 @@ bin/
 **/generated/**
 **/buildSrc/**
 **/out/**
+**/bin/**
+**/infra/**/data/**

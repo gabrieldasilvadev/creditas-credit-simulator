@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 
-@FeignClient(name = "exchangeClient", url = "\${exchange.url}")
+@FeignClient(name = "exchangeClient", url = "\${external.exchange-rate.url}")
 @Component
 interface AwesomeApiClient {
   @GetMapping("/json/last/{from}-{to}")

@@ -11,9 +11,9 @@ import br.com.simulator.credit.openapi.web.dto.BulkSimulationStatusResponseDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationRequestDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationResponseDto
 import com.trendyol.kediatr.Mediator
+import java.util.UUID
 import org.instancio.Instancio
 import org.springframework.http.ResponseEntity
-import java.util.UUID
 
 class LoanSimulationController(
   private val mediator: Mediator,
@@ -25,7 +25,9 @@ class LoanSimulationController(
   ): ResponseEntity<LoanSimulationResponseDto> {
     val interestRatePolicy =
       policyConfiguration.resolve(
-        PolicyType.entryOf(loanSimulationRequestDto.policyType.value),
+        PolicyType.entryOf(
+          loanSimulationRequestDto.policyType?.value ?: PolicyType.FIXED.value
+        )
       )
     val simulationHttpResponse = mediator.send(loanSimulationRequestDto.toCommand(interestRatePolicy))
     return ResponseEntity.ok(simulationHttpResponse.toResponseDto())
@@ -37,7 +39,8 @@ class LoanSimulationController(
     val bulkId = UUID.randomUUID()
     val simulations =
       bulkLoanSimulationRequestDto.simulations.map {
-        val interestRatePolicy = policyConfiguration.resolve(PolicyType.entryOf(it.policyType.value))
+        val interestRatePolicy =
+          policyConfiguration.resolve(PolicyType.entryOf(it.policyType?.value ?: PolicyType.FIXED.value))
         it.toCommandDto(interestRatePolicy = interestRatePolicy)
       }.toList()
     mediator.send(StartBulkSimulationCommand(bulkId = bulkId, simulations = simulations))
