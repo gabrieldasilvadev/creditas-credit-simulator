@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/adapters" />
+            <option value="$PROJECT_DIR$/adapters/inbound" />
+            <option value="$PROJECT_DIR$/adapters/inbound/api-rest" />
+            <option value="$PROJECT_DIR$/adapters/inbound/messaging" />
+            <option value="$PROJECT_DIR$/adapters/outbound" />
+            <option value="$PROJECT_DIR$/adapters/outbound/external-api" />
+            <option value="$PROJECT_DIR$/adapters/outbound/messaging" />
+            <option value="$PROJECT_DIR$/adapters/outbound/notification" />
+            <option value="$PROJECT_DIR$/adapters/outbound/persistence" />
+            <option value="$PROJECT_DIR$/application" />
+            <option value="$PROJECT_DIR$/container" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/common-domain" />
+            <option value="$PROJECT_DIR$/core/simulation-domain" />
+            <option value="$PROJECT_DIR$/infrastructure" />
+            <option value="$PROJECT_DIR$/integration-test" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

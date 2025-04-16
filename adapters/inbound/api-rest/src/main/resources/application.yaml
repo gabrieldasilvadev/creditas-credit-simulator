@@ -1,0 +1,4 @@
+springdoc:
+  swagger-ui:
+    url: ./contract/api-docs.yaml
+    path: /swagger-ui.html

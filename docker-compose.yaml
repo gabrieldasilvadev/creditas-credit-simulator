@@ -1,0 +1,46 @@
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "4576:4576"
+    environment:
+      - 'LOCALSTACK_HOSTNAME=localhost.localstack.cloud'
+      - 'AWS_ACCESS_KEY_ID=localstack'
+      - 'AWS_SECRET_ACCESS_KEY=localstack'
+      - 'AWS_DEFAULT_REGION=us-east-1'
+      - 'SERVICES=sns,sqs'
+      - 'DEBUG=${DEBUG-}'
+    volumes:
+      - ./infra/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh:ro
+      - ./infra/localstack/sqs/email-queue-setup.sh:/etc/localstack/init/ready.d/email-queue-setup.sh:ro
+      - ./infra/localstack/sqs/simulation-subscription-setup.sh:/etc/localstack/init/ready.d/simulation-subscription-setup.sh:ro
+      - ./infra/localstack/sns/simulation-topic-setup.sh:/etc/localstack/init/ready.d/simulation-topic-setup.sh:ro
+      - ./infra/localstack/config:/etc/localstack/init/ready.d/config:ro
+    networks:
+      docker-localstack-network:
+        aliases:
+          - sns
+          - sqs
+    restart: unless-stopped
+  mongodb:
+    container_name: mongodb
+    image: mongo:8.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=creditas
+      - MONGO_INITDB_ROOT_PASSWORD=creditas
+    volumes:
+      - ./infra/mongodb/data:/data/db
+    networks:
+      docker-localstack-network:
+        aliases:
+          - mongodb
+    restart: unless-stopped
+
+networks:
+  docker-localstack-network:
+    name: docker-localstack-network

@@ -1,0 +1,108 @@
+server:
+  port: 7000
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      uri: mongodb://creditas:creditas@localhost:27017/creditas?authSource=admin&maxPoolSize=100&minPoolSize=10&connectTimeoutMS=1000&socketTimeoutMS=3000&serverSelectionTimeoutMS=3000
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: localstack
+        secret-key: localstack
+      sqs:
+        enabled: true
+        endpoint: http://localhost:4566
+      sns:
+        enabled: true
+        endpoint: http://localhost:4566
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  cache:
+    type: caffeine
+    cache-names:
+      - exchangeRateCache
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=10m
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 587
+    username: 2e5bef04a0c453
+    password: 0158610dc600e3
+    properties:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+
+resilience4j:
+  ratelimiter:
+    instances:
+      simulate-bulk:
+        limit-for-period: 200
+        limit-refresh-period: 1s
+        timeout-duration: 0
+
+  circuitbreaker:
+    instances:
+      simulate-circuit:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+
+  retry:
+    instances:
+      simulate-retry:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+
+  bulkhead:
+    instances:
+      simulate-bulkhead:
+        max-concurrent-calls: 50
+        max-wait-duration: 0
+
+logging:
+  level:
+    root: INFO
+#    org.springframework.cloud.aws.messaging.listener: DEBUG
+#    io.awspring.cloud: DEBUG
+
+cloud:
+  aws:
+    messaging:
+      listener:
+        simple:
+          queue-names:
+            email-notification-queue: email-notification-queue
+
+internal:
+  simulation:
+    bulk:
+      size: 500
+      buffer: 1000
+  interest:
+    fixed:
+      rate: 0.03
+
+external:
+  exchange-rate:
+    url: https://economia.awesomeapi.com.br
+
+feature:
+  toggle:
+    send-email: false

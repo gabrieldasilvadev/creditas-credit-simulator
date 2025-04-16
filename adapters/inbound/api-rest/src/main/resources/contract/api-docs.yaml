@@ -1,0 +1,224 @@
+openapi: 3.0.3
+info:
+  title: Simulador de Crédito
+  description: 'API para simulação de empréstimos com base em valor, idade e prazo.'
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:7000'
+    description: Servidor local
+paths:
+  /simulations:
+    post:
+      summary: Simular empréstimo
+      description: 'Retorna o valor total, parcelas e juros com base no valor, idade e prazo.'
+      operationId: simulateLoan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanSimulationRequest'
+      responses:
+        '200':
+          description: Resultado da simulação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanSimulationResponse'
+        '400':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno no servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - credit-simulation
+
+  /simulations/bulk:
+    post:
+      summary: Iniciar simulações em lote
+      description: Inicia o processamento assíncrono de simulações em lote e retorna um ID para consulta posterior.
+      operationId: startBulkSimulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkLoanSimulationRequest'
+      responses:
+        '202':
+          description: Simulações recebidas com sucesso. Retorna o ID do lote.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSimulationInitResponse'
+        '400':
+          description: Erro de validação
+        '500':
+          description: Erro interno no servidor
+      tags:
+        - credit-simulation
+
+  /simulations/bulk/{bulkId}:
+    get:
+      summary: Consultar status de simulação em lote
+      description: Consulta o progresso ou resultado final de uma simulação em lote.
+      operationId: getBulkSimulationStatus
+      parameters:
+        - name: bulkId
+          in: path
+          required: true
+          description: ID da simulação em lote
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Status atual da simulação em lote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSimulationStatusResponse'
+        '404':
+          description: Simulação em lote não encontrada
+      tags:
+        - credit-simulation
+
+components:
+  schemas:
+    LoanSimulationRequest:
+      type: object
+      properties:
+        loan_amount:
+          $ref: '#/components/schemas/Money'
+        customer_info:
+          $ref: '#/components/schemas/CustomerInfoRequest'
+        months:
+          type: integer
+        policy_type:
+          type: string
+          enum: [fixed, age]
+        source_currency:
+          type: string
+        target_currency:
+          type: string
+      required:
+        - loan_amount
+        - customer_info
+        - months
+        - policy_type
+
+    BulkLoanSimulationRequest:
+      type: object
+      properties:
+        simulations:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoanSimulationRequest'
+      required:
+        - simulations
+
+    LoanSimulationResponse:
+      type: object
+      properties:
+        source:
+          type: object
+          properties:
+            amount:
+              $ref: '#/components/schemas/Money'
+        target:
+          type: object
+          properties:
+            converted_amount:
+              $ref: '#/components/schemas/Money'
+            total_payment:
+              $ref: '#/components/schemas/Money'
+            monthly_installment:
+              $ref: '#/components/schemas/Money'
+            total_interest:
+              $ref: '#/components/schemas/Money'
+            annual_interest_rate:
+              $ref: '#/components/schemas/Rate'
+
+    BulkSimulationInitResponse:
+      type: object
+      properties:
+        bulk_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [RECEIVED, PROCESSING]
+      required:
+        - bulk_id
+        - status
+
+    BulkSimulationStatusResponse:
+      type: object
+      properties:
+        bulk_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [RECEIVED, PROCESSING, COMPLETED, FAILED]
+        processed:
+          type: integer
+        total:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoanSimulationResponse'
+      required:
+        - bulk_id
+        - status
+        - processed
+        - total
+
+    CustomerInfoRequest:
+      type: object
+      properties:
+        birth_date:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+      required:
+        - birth_date
+        - email
+
+    Money:
+      type: object
+      properties:
+        amount:
+          type: string
+        currency:
+          type: string
+      required:
+        - amount
+        - currency
+
+    Rate:
+      type: string
+      pattern: '^(?!0\.00$)(?:[1-9]\d*(\.\d{2})?|0\.\d*[1-9]\d*)$'
+
+    ErrorResponse:
+      type: object
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+      required:
+        - type
+        - message
