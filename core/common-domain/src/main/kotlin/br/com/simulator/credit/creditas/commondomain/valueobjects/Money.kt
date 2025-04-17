@@ -1,5 +1,6 @@
-package br.com.simulator.credit.creditas.commondomain
+package br.com.simulator.credit.creditas.commondomain.valueobjects
 
+import br.com.simulator.credit.creditas.commondomain.AMOUNT_SCALE
 import java.math.BigDecimal
 import java.math.RoundingMode
 

@@ -1,7 +1,7 @@
 package br.com.simulator.credit.creditas.simulationdomain.api.events
 
-import br.com.simulator.credit.creditas.commondomain.DomainEvent
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.abstractions.DomainEvent
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanSimulationData
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.SimulationResult
 import com.fasterxml.jackson.annotation.JsonCreator

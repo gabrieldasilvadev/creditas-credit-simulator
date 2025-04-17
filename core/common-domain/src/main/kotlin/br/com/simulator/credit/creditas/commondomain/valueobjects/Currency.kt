@@ -1,4 +1,4 @@
-package br.com.simulator.credit.creditas.commondomain
+package br.com.simulator.credit.creditas.commondomain.valueobjects
 
 import java.util.Currency as JavaCurrency
 

@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.persistence.documents
 
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document

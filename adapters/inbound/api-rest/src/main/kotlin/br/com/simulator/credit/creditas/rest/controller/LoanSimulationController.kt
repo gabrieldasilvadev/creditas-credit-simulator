@@ -14,7 +14,9 @@ import com.trendyol.kediatr.Mediator
 import java.util.UUID
 import org.instancio.Instancio
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.RestController
 
+@RestController
 class LoanSimulationController(
   private val mediator: Mediator,
   private val policyConfiguration: PolicyConfiguration,
@@ -23,7 +25,7 @@ class LoanSimulationController(
   override suspend fun simulateLoan(
     loanSimulationRequestDto: LoanSimulationRequestDto,
   ): ResponseEntity<LoanSimulationResponseDto> {
-    val interestRatePolicy =
+      val interestRatePolicy =
       policyConfiguration.resolve(
         PolicyType.entryOf(
           loanSimulationRequestDto.policyType?.value ?: PolicyType.FIXED.value

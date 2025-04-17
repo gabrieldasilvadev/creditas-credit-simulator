@@ -1,5 +1,6 @@
 package br.com.simulator.credit.creditas.commondomain
 
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
 import org.apache.commons.lang3.StringUtils
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows

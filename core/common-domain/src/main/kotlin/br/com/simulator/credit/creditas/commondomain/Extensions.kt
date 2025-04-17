@@ -1,5 +1,7 @@
 package br.com.simulator.credit.creditas.commondomain
 
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import org.instancio.Select
 import org.instancio.TargetSelector
 import java.lang.reflect.Field

@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+  implementation(project(":infrastructure"))
   implementation("org.springframework.boot:spring-boot-starter-mail:3.4.4")
 }
 

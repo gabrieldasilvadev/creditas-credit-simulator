@@ -2,6 +2,7 @@ package br.com.simulator.credit.creditas.command.bulk
 
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto.Companion.toSimulateLoanCommand
 import br.com.simulator.credit.creditas.dto.LoanSimulationHttpResponse
+import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.persistence.adapter.BulkSimulationPersistenceAdapter
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationDocument
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationResponseDto
@@ -24,6 +25,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
 @Component
+@Monitorable("StartBulkSimulationCommandHandler")
 class StartBulkSimulationCommandHandler(
   private val repository: BulkSimulationPersistenceAdapter,
   private val mediator: Mediator,

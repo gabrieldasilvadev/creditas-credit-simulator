@@ -1,7 +1,7 @@
 package br.com.simulator.credit.creditas.factory
 
-import br.com.simulator.credit.creditas.commondomain.Currency
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.exchangerate.ExchangeRateService
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanAmount
 import org.springframework.stereotype.Component

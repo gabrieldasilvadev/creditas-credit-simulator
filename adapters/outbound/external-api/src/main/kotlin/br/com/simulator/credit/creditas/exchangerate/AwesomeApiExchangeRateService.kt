@@ -1,7 +1,7 @@
 package br.com.simulator.credit.creditas.exchangerate
 
-import br.com.simulator.credit.creditas.commondomain.Currency
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.exchangerate.client.AwesomeApiClient
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
@@ -13,7 +13,7 @@ class AwesomeApiExchangeRateService(
 
   @Cacheable(
     value = ["exchangeRateCache"],
-    key = "#from.currency.code + #to.code",
+    key = "#from.currency.toString() + #to.toString()",
     unless = "#result == null"
   )
   override fun convert(

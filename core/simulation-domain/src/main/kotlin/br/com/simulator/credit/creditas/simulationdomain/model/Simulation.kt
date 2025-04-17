@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.simulationdomain.model
 
-import br.com.simulator.credit.creditas.commondomain.DomainObject
+import br.com.simulator.credit.creditas.commondomain.abstractions.DomainObject
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanAmount
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.SimulationResult

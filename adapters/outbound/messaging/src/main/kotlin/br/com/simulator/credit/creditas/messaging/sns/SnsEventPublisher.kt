@@ -1,7 +1,7 @@
 package br.com.simulator.credit.creditas.messaging.sns
 
-import br.com.simulator.credit.creditas.commondomain.DomainEvent
-import br.com.simulator.credit.creditas.commondomain.EventPublisher
+import br.com.simulator.credit.creditas.commondomain.abstractions.DomainEvent
+import br.com.simulator.credit.creditas.commondomain.ports.EventPublisher
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Recover
@@ -21,8 +21,7 @@ class SnsEventPublisher(
     backoff = Backoff(delay = 1000, multiplier = 2.0),
   )
   override fun publish(
-    event: DomainEvent,
-    topicKey: String,
+    event: DomainEvent
   ) {
     val message = objectMapper.writeValueAsString(event)
 

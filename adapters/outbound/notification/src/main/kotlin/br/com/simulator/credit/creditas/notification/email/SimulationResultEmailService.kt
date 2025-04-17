@@ -1,12 +1,14 @@
 package br.com.simulator.credit.creditas.notification.email
 
-import br.com.simulator.credit.creditas.commondomain.EmailSender
+import br.com.simulator.credit.creditas.commondomain.ports.EmailSender
+import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Component
 
 @Component
+@Monitorable("SimulationResultEmailService")
 class SimulationResultEmailService(
   private val emailSender: JavaMailSender,
   @Value("\${feature.toggle.send-email}")
@@ -25,7 +27,7 @@ class SimulationResultEmailService(
       emailSender.send(message)
       println("EMAIL ENVIADO")
     } else {
-      println("EMAIL NÃO ENVIADO")
+      println("ENVIO EMAIL DESATIVADO")
     }
   }
 }

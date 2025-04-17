@@ -83,6 +83,7 @@ subprojects {
     implementation("io.github.resilience4j:resilience4j-kotlin:$resilience4jVersion")
 
     implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.micrometer:micrometer-core")
     implementation("org.aspectj:aspectjweaver:1.9.21")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
     implementation("org.apache.commons:commons-lang3:3.17.0")
@@ -122,16 +123,6 @@ subprojects {
       exclude("**/generated/**")
       exclude("**/generated/openapi/**")
       include("**/kotlin/**")
-    }
-  }
-
-  if (project.name == "api-rest") {
-    tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask>().configureEach {
-      dependsOn(":adapters:inbound:api-rest:openApiGenerate")
-    }
-
-    tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask>().configureEach {
-      dependsOn(":adapters:inbound:api-rest:openApiGenerate")
     }
   }
 

@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/json/last/BRL-USD"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "BRLUSD": {
+        "code": "BRL",
+        "codein": "USD",
+        "ask": "0.1990"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

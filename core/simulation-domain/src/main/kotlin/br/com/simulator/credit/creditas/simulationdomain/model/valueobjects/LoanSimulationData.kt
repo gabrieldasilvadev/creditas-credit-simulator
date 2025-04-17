@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.simulationdomain.model.valueobjects
 
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
 
 data class LoanSimulationData(

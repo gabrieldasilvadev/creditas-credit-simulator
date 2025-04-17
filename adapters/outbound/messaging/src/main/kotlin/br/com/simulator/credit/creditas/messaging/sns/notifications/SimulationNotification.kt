@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.messaging.sns.notifications
 
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
 
 data class SimulationNotification(

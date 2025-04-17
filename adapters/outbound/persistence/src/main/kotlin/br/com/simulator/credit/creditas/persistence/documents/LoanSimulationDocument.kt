@@ -1,16 +1,16 @@
 package br.com.simulator.credit.creditas.persistence.documents
 
-import br.com.simulator.credit.creditas.commondomain.Currency
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.simulationdomain.model.SimulateLoanAggregate
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.SimulationResult
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "simulation")
 data class LoanSimulationDocument(
@@ -40,6 +40,7 @@ data class LoanSimulationDocument(
   companion object {
     fun from(simulateLoanAggregate: SimulateLoanAggregate) =
       LoanSimulationDocument(
+        id = simulateLoanAggregate.id.value,
         email = simulateLoanAggregate.customerInfo.customerEmail,
         birthDate = simulateLoanAggregate.customerInfo.birthDate,
         loanAmount = simulateLoanAggregate.simulation.loanAmount.value.toBigDecimal(),

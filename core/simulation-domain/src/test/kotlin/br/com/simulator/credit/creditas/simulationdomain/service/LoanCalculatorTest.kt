@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.simulationdomain.service
 
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.commondomain.toMoney
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
 import org.assertj.core.api.Assertions.assertThat

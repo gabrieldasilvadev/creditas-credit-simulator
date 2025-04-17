@@ -1,0 +1,51 @@
+services:
+  simulator-api:
+    container_name: simulator-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7000:7000"
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      exchange.url: http://mock-exchange:8080
+      spring.data.mongodb.uri: mongodb://mongo:27017/creditas?authSource=admin
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mock-exchange:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:7000/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    image: mongo:6.0
+    container_name: simulator-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mock-exchange:
+    image: wiremock/wiremock:3.3.1
+    container_name: mock-exchange
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./infra/mocks:/home/wiremock
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/__admin" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:

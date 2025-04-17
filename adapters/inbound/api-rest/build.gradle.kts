@@ -77,10 +77,6 @@ tasks.named("clean") {
   delete("$projectDir/generated/openapi")
 }
 
-sourceSets["main"].kotlin {
-  srcDir("$buildDir/generated/openapi/src/main/kotlin")
-}
-
 tasks.named("compileKotlin") {
   dependsOn("openApiGenerate")
 }
@@ -91,8 +87,4 @@ ktlint {
       it.file.toPath().startsWith(projectDir.toPath().resolve("generated/openapi"))
     }
   }
-}
-
-sourceSets["main"].kotlin {
-  srcDir("$projectDir/generated/openapi/src/main/kotlin")
 }

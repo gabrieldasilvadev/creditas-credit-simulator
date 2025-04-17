@@ -1,8 +1,9 @@
 package br.com.simulator.credit.creditas.command
 
-import br.com.simulator.credit.creditas.commondomain.DomainEventPublisher
+import br.com.simulator.credit.creditas.commondomain.abstractions.DomainEventPublisher
 import br.com.simulator.credit.creditas.dto.LoanSimulationHttpResponse
 import br.com.simulator.credit.creditas.factory.LoanAmountFactory
+import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.simulationdomain.model.SimulateLoanAggregate
 import br.com.simulator.credit.creditas.simulationdomain.model.ports.SimulationPersistencePort
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
@@ -12,6 +13,7 @@ import com.trendyol.kediatr.CommandWithResultHandler
 import org.springframework.stereotype.Component
 
 @Component
+@Monitorable("SimulateLoanCommandHandler")
 class SimulateLoanCommandHandler(
   private val domainEventPublisher: DomainEventPublisher,
   private val loanAmountFactory: LoanAmountFactory,

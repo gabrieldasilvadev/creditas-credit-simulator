@@ -26,5 +26,7 @@ buildCache {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include("adapters:inbound:messaging")
+include("adapters:inbound:api-rest")
 findProject(":adapters:inbound:messaging")?.name = "messaging"
+findProject(":adapters:inbound:api-rest")?.name = "api-rest"
 findProject(":adapters:outbound:persistence")?.name = "persistence"

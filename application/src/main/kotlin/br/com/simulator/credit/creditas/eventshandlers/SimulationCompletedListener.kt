@@ -17,10 +17,7 @@ class SimulationCompletedListener(
   @Async
   fun handler(event: SimulationCompletedEvent) {
     println("[SimulationCompletedListener] E-MAIL received: $event")
-    snsEventPublisher.publish(
-      event,
-      "arn:aws:sns:us-east-1:000000000000:credit-simulation-topic",
-    )
+    snsEventPublisher.publish(event)
     println("E-MAIL published: $event")
   }
 }

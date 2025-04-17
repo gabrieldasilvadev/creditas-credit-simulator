@@ -15,6 +15,7 @@ dependencies {
   implementation(project(":adapters:outbound:messaging"))
   implementation(project(":adapters:outbound:external-api"))
   implementation(project(":adapters:outbound:persistence"))
+  implementation(project(":infrastructure"))
   testImplementation(kotlin("test"))
 }
 

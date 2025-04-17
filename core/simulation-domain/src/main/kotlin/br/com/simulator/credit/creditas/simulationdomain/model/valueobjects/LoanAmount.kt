@@ -1,7 +1,7 @@
 package br.com.simulator.credit.creditas.simulationdomain.model.valueobjects
 
 import br.com.simulator.credit.creditas.commondomain.AMOUNT_SCALE
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
 import java.math.BigDecimal
 import java.math.RoundingMode

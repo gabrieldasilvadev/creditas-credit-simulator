@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: credit-simulator
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/credit-test
+
+  cloud:
+    aws:
+      credentials:
+        access-key: test
+        secret-key: test
+      region:
+        static: us-east-1
+      endpoint: http://localhost:4566
+
+external:
+  exchange-rate:
+    url: http://localhost:9291
+
+wiremock:
+  server:
+    port: 9291
+    stubs: classpath:/stubs
+    files: classpath:/stubs
+
+logging:
+  level:
+    root: WARN
+    br.com.simulator: DEBUG

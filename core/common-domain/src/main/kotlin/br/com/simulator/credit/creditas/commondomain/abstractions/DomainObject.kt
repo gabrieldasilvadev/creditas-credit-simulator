@@ -1,4 +1,4 @@
-package br.com.simulator.credit.creditas.commondomain
+package br.com.simulator.credit.creditas.commondomain.abstractions
 
 abstract class DomainObject {
   private val _domainEvents = mutableListOf<DomainEvent>()

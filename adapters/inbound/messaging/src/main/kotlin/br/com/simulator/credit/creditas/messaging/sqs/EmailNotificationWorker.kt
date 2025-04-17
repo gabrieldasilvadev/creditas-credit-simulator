@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.messaging.sqs
 
-import br.com.simulator.credit.creditas.commondomain.EmailSender
+import br.com.simulator.credit.creditas.commondomain.ports.EmailSender
 import br.com.simulator.credit.creditas.notification.email.EmailContent
 import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationCompletedEvent
 import com.fasterxml.jackson.databind.ObjectMapper

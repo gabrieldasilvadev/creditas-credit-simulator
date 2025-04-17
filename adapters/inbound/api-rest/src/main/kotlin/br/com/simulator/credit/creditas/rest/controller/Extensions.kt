@@ -2,8 +2,8 @@ package br.com.simulator.credit.creditas.rest.controller
 
 import br.com.simulator.credit.creditas.command.SimulateLoanCommand
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto
-import br.com.simulator.credit.creditas.commondomain.Currency
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.commondomain.toMoney
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
 import br.com.simulator.credit.creditas.dto.LoanSimulationHttpResponse

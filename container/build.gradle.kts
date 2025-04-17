@@ -8,9 +8,11 @@ version = "1.0-SNAPSHOT"
 
 repositories {
   mavenCentral()
+  maven("https://jitpack.io")
 }
 
 dependencies {
+  implementation(project(":adapters:inbound:api-rest"))
   implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
   runtimeOnly("org.glassfish.jaxb:jaxb-runtime:4.0.0")
 

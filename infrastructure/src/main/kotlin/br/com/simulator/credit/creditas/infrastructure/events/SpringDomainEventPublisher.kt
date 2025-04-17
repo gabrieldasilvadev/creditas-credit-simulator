@@ -1,7 +1,7 @@
 package br.com.simulator.credit.creditas.infrastructure.events
 
-import br.com.simulator.credit.creditas.commondomain.DomainEvent
-import br.com.simulator.credit.creditas.commondomain.DomainEventPublisher
+import br.com.simulator.credit.creditas.commondomain.abstractions.DomainEvent
+import br.com.simulator.credit.creditas.commondomain.abstractions.DomainEventPublisher
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component

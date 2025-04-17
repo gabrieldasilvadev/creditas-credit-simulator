@@ -1,4 +1,4 @@
-package br.com.simulator.credit.creditas.commondomain
+package br.com.simulator.credit.creditas.commondomain.abstractions
 
 interface DomainEvent {
   val occurredOn: Long

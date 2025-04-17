@@ -1,213 +1,166 @@
-# 💡 Projeto: Simulador de Crédito
+# 💰 Credit Simulator
+>#### ⚠️ Alerta de Over Engineering
+> Este projeto é uma demonstração de habilidades e não deve ser utilizado em produção.
 
-Este sistema permite simular condições de empréstimo com base em:
-
-- Valor do empréstimo
-- Prazo de pagamento (em meses)
-- Data de nascimento do cliente
-
-O sistema calcula:
-
-- Valor total a pagar
-- Valor de cada parcela
-- Total de juros pagos
-
-A taxa de juros é definida com base em diferentes estratégias (por idade, fixa, etc.).
+Simulador de crédito com API REST para calcular parcelas fixas de empréstimos considerando diferentes políticas de juros, conversão de moedas, processamento em lote e notificações. Desenvolvido com Kotlin + Spring Boot, arquitetura hexagonal, coroutines e observabilidade via Micrometer.
 
 ---
 
-## ▶️ Executando o Projeto
+## 📦 Tecnologias
+
+- Kotlin + Spring Boot 3.4
+- Gradle Kotlin DSL
+- Arquitetura Hexagonal + DDD
+- MongoDB
+- Coroutines + Flow (para batch)
+- Feign Client + Cache (Caffeine)
+- KediatR (Command Handler)
+- Micrometer (Prometheus)
+- Docker + Docker Compose
+- WireMock (mock de cotações)
+
+---
+
+## 🚀 Como executar
+
+### Requisitos
+
+- Docker + Docker Compose
+- Java 21
+- Linux/Mac/WSL recomendado
+
+### Subindo tudo com Docker
 
 ```bash
-./gradlew bootRun
+docker-compose up --build
 ```
 
-Para rodar os testes:
+Acesse:
+- API: [http://localhost:7000](http://localhost:7000)
+- Prometheus metrics: [http://localhost:7000/actuator/prometheus](http://localhost:7000/actuator/prometheus)
+- MongoDB: `mongodb://localhost:27017`
 
-```bash
-./gradlew test
+---
+
+## 🔁 Endpoints
+
+### 📌 Simular empréstimo (único)
+
+```http
+POST /simulations
 ```
-
----
-
-## 🗂️ Estrutura de Diretórios
-
-- `simulation-domain/` — Núcleo da simulação de crédito
-  - `model/` — Entidades e value objects
-  - `policy/` — Estratégias de cálculo de juros
-  - `application/` — Casos de uso (ex: `SimulateLoan`)
-- `rest-api/` — Camada REST (controladores, DTOs)
-- `adapters/outbound/notification/` — Envio de e-mails
-- `adapters/outbound/messaging/` — Publicação de eventos SNS
-- `configuration/` — Beans, factories, configurações Spring
-- `infra/` — Scripts de infraestrutura e setup local
-- `integration-test/` — Testes de integração
-- `test/` — Testes automatizados (unitários)
-
----
-
-## ✅ Requisitos Atendidos
-
-### Requisitos Funcionais (conforme enunciado do desafio)
-
-- Simulação com base em:
-  - Valor solicitado
-  - Prazo em meses
-  - Data de nascimento do cliente
-- Taxas de juros variáveis por idade
-- Resultado: total, parcela, juros
-- Suporte a taxa fixa e estratégia customizada
-- Processamento de alta volumetria
-- Arquitetura modular, testada e documentada
-- Suporte a múltiplas moedas
-- Envio de e-mail com resultado da simulação
-- Documentação Swagger
-
----
-
-## 🔢 Políticas de taxa de juros implementadas
-
-### 1. Taxa Variável por Faixa Etária
-
-| Faixa Etária     | Taxa Anual |
-|------------------|------------|
-| Até 25 anos      | 5% ao ano  |
-| De 26 a 40 anos  | 3% ao ano  |
-| De 41 a 60 anos  | 2% ao ano  |
-| Acima de 60 anos | 4% ao ano  |
-
-> Implementado via `AgeBasedRatePolicy`.
-
-### 2. Taxa Fixa
-
-> Implementado via `FixedRatePolicy(taxa: BigDecimal)`
-
----
-
-## ⚙️ Estratégia aplicada (Strategy Pattern)
-
-```kotlin
-val policy: InterestRatePolicy = AgeBasedRatePolicy()
-// ou
-val policy: InterestRatePolicy = FixedRatePolicy(BigDecimal("0.03"))
-
-val simulateLoan = SimulateLoan(policy)
-simulateLoan.execute(application)
-```
-
-Ou de forma dinâmica:
-
-```kotlin
-val policy = InterestRatePolicyFactory.from("age")
-```
-
----
-
-## 📡 Exemplo de Requisição REST
 
 ```json
-POST /simulations
 {
   "loan_amount": {
-    "amount": "string",
-    "currency": "string"
+    "amount": "1000.00",
+    "currency": "USD"
   },
   "customer_info": {
-    "birth_date": "2019-08-24",
-    "email": "user@example.com"
+    "birth_date": "2000-01-01",
+    "email": "a@a.com"
   },
-  "months": 0,
-  "policy_type": "fixed",
-  "source_currency": "string",
-  "target_currency": "string"
+  "months": 12,
+  "policy_type": "age",
+  "source_currency": "USD",
+  "target_currency": "BRL"
 }
 ```
+
+### 📌 Simular empréstimos em lote
+
+```http
+POST /simulations/batch
+```
+
+Aceita até milhares de simulações em uma única chamada (reativo, com buffer configurável).
+
+---
+
+## 📐 Arquitetura
+
+O projeto segue os princípios da arquitetura hexagonal (Ports and Adapters), com separação clara de domínios:
+
+- `core`: lógica de negócio pura
+- `application`: orquestração com comandos e handlers (KediatR)
+- `adapters`: entrada (REST, mensagens), saída (Mongo, APIs externas)
+- `container`: ponto de entrada da aplicação
+
+---
+
+## 🧠 Políticas de Juros
+
+- Até 25 anos: 5% a.a.
+- 26 a 40 anos: 3% a.a.
+- 41 a 60 anos: 2% a.a.
+- Acima de 60 anos: 4% a.a.
+
+Com suporte a múltiplas `InterestRatePolicy` dinâmicas.
+
+---
+
+## 🌍 Conversão de Moedas
+
+- Utiliza Feign Client para acessar a [AwesomeAPI](https://docs.awesomeapi.com.br/api-de-moedas).
+- Cache com TTL (10min) usando Caffeine.
+- Mock para ambiente local via WireMock.
+
+---
+
+## 📊 Observabilidade
+
+### Annotation `@Monitorable`
+
+Monitora todas as execuções públicas de classes anotadas, registrando:
+
+- Tempo de execução (`method.execution`)
+- Quantidade de chamadas (`method.calls`)
+
+Expose: `GET /actuator/prometheus`
 
 ---
 
 ## 🧪 Testes
 
-- Políticas de juros
-- Casos de borda
-- Application services
-- Simulação completa
-- Cobertura com Jacoco
+- Unitários: JUnit5 + MockK
+- Integração: SpringBootTest + Testcontainers (mock Mongo)
+- Reativos: Testes com Flow
+- Cobertura: Jacoco
 
----
-
-## 🧰 Execução Local com Docker e Makefile
+### Gerar cobertura
 
 ```bash
-make localstack-start
-make mongodb-start
-make setup
+./gradlew jacocoTestReport
 ```
 
-Para destruir recursos:
+> 💡 Cobertura: ~85% classes de domínio, 100% dos casos principais
 
-```bash
-make teardown
+---
+
+## 📬 Notificações por Email
+
+Simulação envia e-mail com resultado via SQS (mockado/local). Estrutura pronta para mensageria assíncrona.
+
+---
+
+## ⚙️ Variáveis importantes
+
+```env
+exchange.url=http://mock-exchange:8080
+spring.data.mongodb.uri=mongodb://mongo:27017/creditas?authSource=admin
 ```
 
 ---
 
-## 📑 Swagger
+## 🧪 Futuras melhorias
 
-Acesse: [http://localhost:7000/swagger-ui.html](http://localhost:7000/swagger-ui.html)
-
----
-
-## 🧠 Extensões Futuras
-
-- Template HTML no e-mail
-- Eventos Kafka
-- Testes de performance
+- Políticas de taxa indexada (ex: CDI, inflação)
+- Suporte a WebSocket para notificação
+- Painel com métricas via Grafana
+- Cache distribuído com Redis
 
 ---
 
-## 📊 Arquitetura (Mermaid)
+## 🧾 Licença
 
-```mermaid
-flowchart TD
-    Z["simulation-app
-(SpringBoot main entry)"]
-    Z --> A2["simulation-domain
-(Core domain: Simulation, Policies, Use Cases)"]
-    Z --> B1["rest-api
-(Controller, DTOs, Config)"]
-    Z --> C1["policy-factory
-(InterestRatePolicyFactory)"]
-    Z --> C2["messaging-adapter
-(Event Publisher - stub)"]
-    Z --> C3["persistence-adapter
-(Repository - stub)"]
-    Z --> T["integration-test
-(Unit, Integration, Perf)"]
-    B1 --> A2
-    C1 --> A2
-    C2 --> A2
-    C3 --> A2
-    classDef core fill: #E6F7FF, stroke: #1890ff
-    classDef adapter fill: #FFFBE6, stroke: #FAAD14
-    classDef infra fill: #F0F5FF, stroke: #2F54EB
-    classDef app fill: #F6FFED, stroke: #52C41A
-    classDef test fill: #FFF0F6, stroke: #EB2F96
-    class Z app
-    class A2 core
-    class B1 adapter
-    class C1 adapter
-    class C2 adapter
-    class C3 adapter
-    class T test
-```
-
-```mermaid
-flowchart LR
-  A["SimulateLoanCommand"] --> B["SimulateLoanHandler"]
-  B --> C["Simulation Domain Model"]
-  C --> D["SimulationCompletedEvent"]
-  D --> E["DomainEventPublisher - Port"]
-  E --> F["SNS Topic"]
-  F --> G["SQS Queue"]
-  G --> H["EmailNotificationWorker"]
-```
+MIT

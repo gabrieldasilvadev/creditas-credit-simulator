@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.dto
 
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import java.math.BigDecimal
 
 data class LoanSimulationHttpResponse(

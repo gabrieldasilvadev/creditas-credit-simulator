@@ -1,7 +1,7 @@
 package br.com.simulator.credit.creditas.notification.email
 
-import br.com.simulator.credit.creditas.commondomain.Currency
-import br.com.simulator.credit.creditas.commondomain.Money
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
 import br.com.simulator.credit.creditas.simulationdomain.api.events.LoanSimulationInputDataEvent
 import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationCompletedEvent
