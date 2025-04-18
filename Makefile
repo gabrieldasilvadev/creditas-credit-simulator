@@ -11,6 +11,7 @@ setup:
 		docker-compose up -d mongodb; \
 		sleep 5; \
 	fi
+	bash ./infra/localstack/teardown.sh
 	bash ./infra/localstack/setup.sh
 
 teardown:

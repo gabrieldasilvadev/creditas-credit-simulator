@@ -3,10 +3,12 @@ package br.com.simulator.credit.creditas.exchangerate
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.exchangerate.client.AwesomeApiClient
+import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 
 @Component
+@Monitorable("AwesomeApiExchangeRateService")
 class AwesomeApiExchangeRateService(
   private val awesomeApiClient: AwesomeApiClient,
 ) : ExchangeRateService {

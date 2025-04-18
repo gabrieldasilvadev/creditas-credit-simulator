@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+  implementation(project(":infrastructure"))
   implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 }
 

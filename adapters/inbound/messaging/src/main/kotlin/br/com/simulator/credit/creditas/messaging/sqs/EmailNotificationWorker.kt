@@ -1,6 +1,7 @@
 package br.com.simulator.credit.creditas.messaging.sqs
 
 import br.com.simulator.credit.creditas.commondomain.ports.EmailSender
+import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.notification.email.EmailContent
 import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationCompletedEvent
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,6 +15,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component
+@Monitorable("EmailNotificationWorker")
 class EmailNotificationWorker(
   private val emailSender: EmailSender<EmailContent>,
   private val objectMapper: ObjectMapper,
