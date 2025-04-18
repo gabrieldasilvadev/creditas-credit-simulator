@@ -1,6 +1,7 @@
 package br.com.simulator.credit.creditas.command.bulk
 
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto.Companion.toSimulateLoanCommand
+import br.com.simulator.credit.creditas.config.BulkSimulationConfig
 import br.com.simulator.credit.creditas.dto.LoanSimulationHttpResponse
 import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.persistence.adapter.BulkSimulationPersistenceAdapter
@@ -9,6 +10,8 @@ import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationResp
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationStatus
 import com.trendyol.kediatr.CommandHandler
 import com.trendyol.kediatr.Mediator
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,150 +21,129 @@ import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 @Monitorable("StartBulkSimulationCommandHandler")
 class StartBulkSimulationCommandHandler(
   private val repository: BulkSimulationPersistenceAdapter,
   private val mediator: Mediator,
-  @Value("\${internal.simulation.bulk.size}")
-  private val bulkSize: Int,
-  @Value("\${internal.simulation.bulk.buffer}")
-  private val bulkBufferCapacity: Int,
+  private val config: BulkSimulationConfig,
 ) : CommandHandler<StartBulkSimulationCommand> {
-  private val logger = LoggerFactory.getLogger(this::class.java)
   private val mutex = Mutex()
+  private val logger: Logger = LoggerFactory.getLogger(StartBulkSimulationCommandHandler::class.java)
 
   override suspend fun handle(command: StartBulkSimulationCommand): Unit =
     coroutineScope {
-      val currentDocument = initializeOrGetBulkDocument(command)
-      val processedCount = AtomicInteger(currentDocument.processed)
+      logger.info("Starting bulk simulation: $command")
+      val document = initializeOrGetDocument(command)
+      val processedCount = AtomicInteger(document.processed)
       val totalToProcess = command.simulations.size
 
       try {
         command.simulations
-          .chunked(bulkSize)
+          .chunked(config.size)
           .asFlow()
-          .buffer(capacity = bulkBufferCapacity)
+          .buffer(config.buffer)
           .map { batch ->
             async(Dispatchers.IO) {
-              processBatch(batch, currentDocument, processedCount, totalToProcess)
+              processBatch(
+                batch = batch,
+                document = document,
+                processedCount = processedCount,
+                total = totalToProcess
+              )
             }
           }
-          .buffer(capacity = bulkBufferCapacity)
           .collect { it.await() }
 
-        updateFinalStatus(command.bulkId, BulkSimulationStatus.COMPLETED)
+        updateStatus(command.bulkId, BulkSimulationStatus.COMPLETED)
       } catch (ex: Exception) {
         logger.error("Error during batch processing: ${ex.message}", ex)
-        updateFinalStatus(command.bulkId, BulkSimulationStatus.FAILED)
+        updateStatus(command.bulkId, BulkSimulationStatus.FAILED)
       }
     }
 
-  private suspend fun initializeOrGetBulkDocument(command: StartBulkSimulationCommand): BulkSimulationDocument =
+  private suspend fun initializeOrGetDocument(command: StartBulkSimulationCommand) =
     mutex.withLock {
-      return repository.findById(command.bulkId).orElseGet {
-        val newDocument =
+      repository.findById(command.bulkId).orElseGet {
+        repository.save(
           BulkSimulationDocument(
             id = command.bulkId,
             status = BulkSimulationStatus.PROCESSING,
             processed = 0,
             total = command.simulations.size,
-          )
-        repository.save(newDocument)
+          ),
+        )
+      }.also {
+        logger.info("Initialized bulk simulation document: $it")
       }
     }
 
   private suspend fun processBatch(
     batch: List<LoanSimulationCommandDto>,
-    currentDocument: BulkSimulationDocument,
+    document: BulkSimulationDocument,
     processedCount: AtomicInteger,
-    totalToProcess: Int,
+    total: Int,
   ) = coroutineScope {
-    batch.map { request ->
-      async(Dispatchers.IO) {
-        processSimulation(request, currentDocument, processedCount, totalToProcess)
-      }
-    }.awaitAll()
+    batch.map { request -> async(Dispatchers.IO) { processSimulation(request, document, processedCount, total) } }
+      .awaitAll()
   }
 
   private suspend fun processSimulation(
     request: LoanSimulationCommandDto,
-    currentDocument: BulkSimulationDocument,
+    document: BulkSimulationDocument,
     processedCount: AtomicInteger,
-    totalToProcess: Int,
+    total: Int,
   ) {
     try {
-      val result: LoanSimulationHttpResponse = mediator.send(request.toSimulateLoanCommand())
-
+      val result = mediator.send(request.toSimulateLoanCommand())
       mutex.withLock {
-        val latestDocument = repository.findById(currentDocument.id).orElse(currentDocument)
-
-        val processed = processedCount.incrementAndGet()
-        val status = determineStatus(processed, totalToProcess)
-
-        val updatedResults = updateResults(latestDocument, request, result)
-
+        val updatedDocument = repository.findById(document.id).orElse(document)
         repository.save(
-          latestDocument.copy(
-            processed = processed,
-            status = status,
-            results = updatedResults,
-          ),
+          updatedDocument.copy(
+            processed = processedCount.incrementAndGet(),
+            status = determineStatus(processedCount.get(), total),
+            results = updatedDocument.results + result.toResponseDto(request),
+          ).also {
+            logger.info("Processed simulation - Request: $request | Result: $result")
+          }
         )
       }
     } catch (ex: Exception) {
-      logger.error("Error when processing simulation: ${ex.message}", ex)
-      mutex.withLock {
-        val latestDocument = repository.findById(currentDocument.id).orElse(currentDocument)
-        repository.save(latestDocument.copy(status = BulkSimulationStatus.FAILED))
-      }
+      logger.error("Error processing simulation: ${ex.message}", ex)
+      updateStatus(document.id, BulkSimulationStatus.FAILED)
     }
   }
 
   private fun determineStatus(
     processed: Int,
     total: Int,
-  ): BulkSimulationStatus =
-    when {
-      processed >= total -> BulkSimulationStatus.COMPLETED
-      else -> BulkSimulationStatus.PROCESSING
-    }
+  ) = if (processed >= total) BulkSimulationStatus.COMPLETED else BulkSimulationStatus.PROCESSING
 
-  private fun updateResults(
-    document: BulkSimulationDocument,
-    request: LoanSimulationCommandDto,
-    result: LoanSimulationHttpResponse,
-  ): List<BulkSimulationResponseDto> {
-    val existingResults = document.results.toMutableList()
-
-    val newResponse =
-      BulkSimulationResponseDto(
-        source = BulkSimulationResponseDto.Source(amount = request.loanAmount),
-        target =
-          BulkSimulationResponseDto.Target(
-            convertedAmount = result.target.convertedAmount,
-            totalPayment = result.target.totalPayment,
-            monthlyInstallment = result.target.monthlyInstallment,
-            totalInterest = result.target.totalInterest,
-            annualInterestRate = result.target.annualInterestRate,
-          ),
-      )
-
-    existingResults.add(newResponse)
-    return existingResults
-  }
-
-  private suspend fun updateFinalStatus(
+  private suspend fun updateStatus(
     bulkId: UUID,
     status: BulkSimulationStatus,
   ) = mutex.withLock {
-    val document = repository.findById(bulkId)
-    document.ifPresent { doc -> repository.save(doc.copy(status = status)) }
+    repository.findById(bulkId).let { repository.save(it.get().copy(status = status)) }.also {
+      logger.info("Updated bulk simulation document status: $it")
+    }
   }
+
+  private fun LoanSimulationHttpResponse.toResponseDto(request: LoanSimulationCommandDto) =
+    BulkSimulationResponseDto(
+      source = BulkSimulationResponseDto.Source(request.loanAmount),
+      target =
+        BulkSimulationResponseDto.Target(
+          convertedAmount = target.convertedAmount,
+          totalPayment = target.totalPayment,
+          monthlyInstallment = target.monthlyInstallment,
+          totalInterest = target.totalInterest,
+          annualInterestRate = target.annualInterestRate,
+        ),
+    ).also {
+      logger.info("Converted simulation response to DTO: $it")
+    }
 }

@@ -9,34 +9,34 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 
 object AwsLocalstackInitializer {
+  private const val endpoint = "http://localhost:4566"
+  private const val region = "us-east-1"
+  private val credentials = BasicAWSCredentials("test", "test")
 
-    private const val endpoint = "http://localhost:4566"
-    private const val region = "us-east-1"
-    private val credentials = BasicAWSCredentials("test", "test")
+  private lateinit var sqs: AmazonSQS
 
-    lateinit var sqs: AmazonSQS
-        private set
+  private lateinit var sns: AmazonSNS
 
-    lateinit var sns: AmazonSNS
-        private set
+  fun setupInfra() {
+    sqs =
+      AmazonSQSClientBuilder.standard()
+        .withEndpointConfiguration(EndpointConfiguration(endpoint, region))
+        .withCredentials(AWSStaticCredentialsProvider(credentials))
+        .build()
 
-    fun setupInfra() {
-        sqs = AmazonSQSClientBuilder.standard()
-            .withEndpointConfiguration(EndpointConfiguration(endpoint, region))
-            .withCredentials(AWSStaticCredentialsProvider(credentials))
-            .build()
+    sns =
+      AmazonSNSClientBuilder.standard()
+        .withEndpointConfiguration(EndpointConfiguration(endpoint, region))
+        .withCredentials(AWSStaticCredentialsProvider(credentials))
+        .build()
 
-        sns = AmazonSNSClientBuilder.standard()
-            .withEndpointConfiguration(EndpointConfiguration(endpoint, region))
-            .withCredentials(AWSStaticCredentialsProvider(credentials))
-            .build()
+    val topicArn = sns.createTopic("credit-simulation-events").topicArn
+    val queueUrl = sqs.createQueue("credit-simulation-queue").queueUrl
 
-        val topicArn = sns.createTopic("credit-simulation-events").topicArn
-        val queueUrl = sqs.createQueue("credit-simulation-queue").queueUrl
+    val queueArn =
+      sqs.getQueueAttributes(queueUrl, listOf("QueueArn"))
+        .attributes["QueueArn"] ?: throw IllegalStateException("Queue ARN not found")
 
-        val queueArn = sqs.getQueueAttributes(queueUrl, listOf("QueueArn"))
-            .attributes["QueueArn"] ?: throw IllegalStateException("Queue ARN not found")
-
-        sns.subscribe(topicArn, "sqs", queueArn)
-    }
+    sns.subscribe(topicArn, "sqs", queueArn)
+  }
 }

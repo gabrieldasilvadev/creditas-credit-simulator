@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan
   basePackages = ["br.com.simulator.credit.creditas"],
 )
 @EnableConfigurationProperties
-class  Application
+class Application
 
 fun main(args: Array<String>) {
   runApplication<Application>(*args)

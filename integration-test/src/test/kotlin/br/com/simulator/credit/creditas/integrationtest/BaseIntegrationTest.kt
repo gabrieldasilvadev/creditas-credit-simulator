@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.restassured.RestAssured
 import io.restassured.config.HttpClientConfig
-import java.io.File
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -21,13 +20,13 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.DockerComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Container
+import java.io.File
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = [Application::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureWireMock(port = 9291, stubs = ["classpath:/stubs"])
 @ActiveProfiles("integration-test")
 abstract class BaseIntegrationTest {
-
   companion object {
     private val resource = File("docker-compose-test.yaml")
 
@@ -66,13 +65,14 @@ abstract class BaseIntegrationTest {
     if (port == 0) throw IllegalStateException("Port not initialized")
     println("▶️ WireMock running on port: ${wireMockServer.port()}")
     RestAssured.port = port
-    RestAssured.config = RestAssured.config()
-      .httpClient(
-        HttpClientConfig.httpClientConfig()
-          .setParam("http.connection.timeout", 5000)
-          .setParam("http.socket.timeout", 5000)
-          .setParam("http.connection-manager.timeout", 5000L)
-      )
+    RestAssured.config =
+      RestAssured.config()
+        .httpClient(
+          HttpClientConfig.httpClientConfig()
+            .setParam("http.connection.timeout", 5000)
+            .setParam("http.socket.timeout", 5000)
+            .setParam("http.connection-manager.timeout", 5000L),
+        )
   }
 
   @AfterEach

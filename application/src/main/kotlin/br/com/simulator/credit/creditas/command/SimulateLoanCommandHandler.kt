@@ -10,6 +10,8 @@ import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.Cust
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanSimulationData
 import br.com.simulator.credit.creditas.simulationdomain.service.SimulateLoanService
 import com.trendyol.kediatr.CommandWithResultHandler
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -19,55 +21,39 @@ class SimulateLoanCommandHandler(
   private val loanAmountFactory: LoanAmountFactory,
   private val simulationPersistencePort: SimulationPersistencePort,
 ) : CommandWithResultHandler<SimulateLoanCommand, LoanSimulationHttpResponse> {
-  override suspend fun handle(command: SimulateLoanCommand): LoanSimulationHttpResponse {
-    val loanAmount =
-      loanAmountFactory.create(
-        amount = command.amount,
-        source = command.sourceCurrency,
-        target = command.targetCurrency,
-      )
+  private val logger: Logger = LoggerFactory.getLogger(SimulateLoanCommandHandler::class.java)
 
-    val applicant =
-      CustomerInfo(
-        birthDate = command.customerInfo.birthDate,
-        customerEmail = command.customerInfo.customerEmail,
-      )
+  override suspend fun handle(command: SimulateLoanCommand): LoanSimulationHttpResponse {
+    logger.info("Starting loan simulation: $command")
+    val loanAmount = loanAmountFactory.create(command.amount, command.sourceCurrency, command.targetCurrency)
+    val applicant = CustomerInfo(command.customerInfo.birthDate, command.customerInfo.customerEmail)
 
     val simulation =
       SimulateLoanService.of(command.policyType).execute(
-        LoanSimulationData.from(
-          loanAmount = loanAmount.value,
-          duration = command.termInMonths,
-          applicant = applicant,
+        LoanSimulationData.from(loanAmount.value, command.termInMonths, applicant),
+      )
+
+    logger.info("Loan simulation completed: $simulation")
+
+    val aggregate = SimulateLoanAggregate.of(simulation, command.customerInfo)
+
+    runCatching { simulationPersistencePort.save(aggregate) }
+      .onSuccess { domainEventPublisher.publishAll(simulation.getAndClearEvents()) }
+      .onFailure { println("Error saving simulation: ${it.message}") }
+      .getOrThrow()
+
+    logger.info("Loan simulation saved successfully: $aggregate")
+
+    return LoanSimulationHttpResponse(
+      source = LoanSimulationHttpResponse.Source(command.amount),
+      target =
+        LoanSimulationHttpResponse.Target(
+          convertedAmount = loanAmount.value,
+          totalPayment = aggregate.simulationResult.totalPayment,
+          monthlyInstallment = aggregate.simulationResult.monthlyInstallment,
+          totalInterest = aggregate.simulationResult.totalInterest,
+          annualInterestRate = command.policyType.annualInterestRate(applicant),
         ),
-      )
-
-    val aggregate =
-      SimulateLoanAggregate.of(
-        simulation = simulation,
-        customerInfo = command.customerInfo,
-      )
-
-    runCatching {
-      simulationPersistencePort.save(aggregate)
-    }.onSuccess {
-      domainEventPublisher.publishAll(simulation.getAndClearEvents())
-    }.onFailure {
-      println("Error saving simulation: ${it.message}")
-    }.getOrThrow()
-
-    val loanSimulationHttpResponse =
-      LoanSimulationHttpResponse(
-        source = LoanSimulationHttpResponse.Source(amount = command.amount),
-        target =
-          LoanSimulationHttpResponse.Target(
-            convertedAmount = loanAmount.value,
-            totalPayment = aggregate.simulationResult.totalPayment,
-            monthlyInstallment = aggregate.simulationResult.monthlyInstallment,
-            totalInterest = aggregate.simulationResult.totalInterest,
-            annualInterestRate = command.policyType.annualInterestRate(applicant),
-          ),
-      )
-    return loanSimulationHttpResponse
+    )
   }
 }

@@ -13,19 +13,22 @@ import org.springframework.stereotype.Component
 @Aspect
 @Component
 class MonitoringAspect(private val meterRegistry: MeterRegistry) {
-
   private val logger = LoggerFactory.getLogger(MonitoringAspect::class.java)
 
   @Around("@within(monitorable)")
-  fun monitor(joinPoint: ProceedingJoinPoint, monitorable: Monitorable): Any? {
+  fun monitor(
+    joinPoint: ProceedingJoinPoint,
+    monitorable: Monitorable,
+  ): Any? {
     val clazz = joinPoint.signature.declaringType.simpleName
     val method = joinPoint.signature.name
     val monitorName = monitorable.value.ifBlank { clazz }
 
-    val tags = mutableListOf(
-      Tag.of("class", monitorName),
-      Tag.of("method", method)
-    )
+    val tags =
+      mutableListOf(
+        Tag.of("class", monitorName),
+        Tag.of("method", method),
+      )
 
     val counter = meterRegistry.counter("method.calls", tags)
     val timer = meterRegistry.timer("method.execution", tags)
@@ -39,10 +42,10 @@ class MonitoringAspect(private val meterRegistry: MeterRegistry) {
     } catch (e: Exception) {
       meterRegistry.counter(
         "method.errors",
-        Tags.of(tags).and("exception", e.javaClass.simpleName)
+        Tags.of(tags).and("exception", e.javaClass.simpleName),
       ).increment()
 
-      logger.error("Error during execution of ${monitorName}.${method}", e)
+      logger.error("Error during execution of $monitorName.$method", e)
 
       joinPoint.proceed()
     }
