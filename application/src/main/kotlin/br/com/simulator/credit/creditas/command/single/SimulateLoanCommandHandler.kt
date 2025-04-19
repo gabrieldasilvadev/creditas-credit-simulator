@@ -12,6 +12,8 @@ import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.Cust
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanSimulationData
 import br.com.simulator.credit.creditas.simulationdomain.service.SimulateLoanService
 import com.trendyol.kediatr.CommandWithResultHandler
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import io.github.resilience4j.retry.annotation.Retry
 import kotlinx.coroutines.sync.withPermit
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,6 +29,8 @@ class SimulateLoanCommandHandler(
 ) : CommandWithResultHandler<SimulateLoanCommand, LoanSimulationHttpResponse> {
   private val logger: Logger = LoggerFactory.getLogger(SimulateLoanCommandHandler::class.java)
 
+  @Retry(name = "simulate-retry")
+  @CircuitBreaker(name = "simulate-circuit")
   override suspend fun handle(command: SimulateLoanCommand): LoanSimulationHttpResponse =
     simulationSemaphoreProvider.semaphore.withPermit {
       logger.info("Starting loan simulation: $command")

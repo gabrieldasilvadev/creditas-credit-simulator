@@ -108,6 +108,12 @@ subprojects {
     tasks.named<BootJar>("bootJar") {
       enabled = false
     }
+  } else {
+    // Configuração específica para o módulo 'container'
+    tasks.named<BootJar>("bootJar") {
+      archiveFileName.set("app.jar")
+      mainClass.set("br.com.simulator.credit.creditas.container.ApplicationKt")
+    }
   }
 
   extensions.configure<KtlintExtension> {
@@ -165,4 +171,9 @@ springBoot {
 
 repositories {
   mavenCentral()
+}
+
+tasks.bootJar {
+  archiveFileName.set("app.jar")
+  mainClass.set("br.com.simulator.credit.creditas.container.ApplicationKt")
 }

@@ -17,7 +17,7 @@ spring:
     allow-bean-definition-overriding: true
   data:
     mongodb:
-      uri: mongodb://creditas:creditas@localhost:27017/creditas?authSource=admin&maxPoolSize=100&minPoolSize=10&connectTimeoutMS=1000&socketTimeoutMS=3000&serverSelectionTimeoutMS=3000
+      uri: ${SPRING_DATA_MONGODB_URI"mongodb://creditas:creditas@localhost:27017/creditas?authSource=admin&maxPoolSize=100&minPoolSize=10&connectTimeoutMS=1000&socketTimeoutMS=3000&serverSelectionTimeoutMS=3000}
   cloud:
     aws:
       region:
@@ -27,10 +27,10 @@ spring:
         secret-key: localstack
       sqs:
         enabled: true
-        endpoint: http://localhost:4566
+        endpoint: ${CLOUD_AWS_SQS_ENDPOINT:http://localhost:4566}
       sns:
         enabled: true
-        endpoint: http://localhost:4566
+        endpoint: ${CLOUD_AWS_SNS_ENDPOINT:http://localhost:4566}
   jackson:
     serialization:
       write-dates-as-timestamps: false
