@@ -52,3 +52,9 @@ bin/
 **/out/**
 **/bin/**
 **/infra/**/data/**
+!**/infra/**/data/**/**
+!**/infra/**/data/*.wt
+!**/infra/**/data/*.lock
+!**/infra/**/data/*.bson
+!**/infra/**/data/*.data
+
