@@ -5,5 +5,4 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @EnableFeignClients(basePackages = ["br.com.simulator.credit.creditas.exchangerate.client"])
-class ClientConfiguration {
-}
+class ClientConfiguration

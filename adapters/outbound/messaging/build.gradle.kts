@@ -10,7 +10,9 @@ repositories {
 }
 
 dependencies {
+  implementation(project(":shared"))
   implementation("io.awspring.cloud:spring-cloud-aws-starter-sns")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs")
 }
 
 tasks.test {

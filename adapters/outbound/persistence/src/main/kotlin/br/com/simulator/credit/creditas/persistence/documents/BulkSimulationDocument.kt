@@ -35,7 +35,7 @@ data class BulkSimulationResponseDto(
     val totalPayment: Money,
     val monthlyInstallment: Money,
     val totalInterest: Money,
-    val annualInterestRate: BigDecimal,
+    val annualInterestRate: Money,
   )
 }
 

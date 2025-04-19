@@ -28,7 +28,7 @@ internal class SimulationResultEmailServiceTest {
   fun `should send email with correct simulation result content`() {
     val applicant = CustomerInfo(LocalDate.of(1990, 1, 1), "user@example.com")
     val amount = Money(BigDecimal("10000.00"), Currency.BRL)
-    val application = LoanSimulationData(amount, Months(12), applicant)
+    val application = LoanSimulationData(amount, Months(12), applicant, amount)
     val result =
       SimulationResult(
         totalPayment = Money("12000.00"),

@@ -15,6 +15,8 @@ repositories {
 dependencies {
   implementation(project(":core:simulation-domain"))
   implementation(project(":application"))
+  implementation(project(":shared"))
+  implementation(project(":infrastructure"))
   implementation(project(":core:common-domain"))
   implementation(project(":adapters:outbound:persistence"))
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
@@ -79,6 +81,10 @@ tasks.named("clean") {
 
 tasks.named("compileKotlin") {
   dependsOn("openApiGenerate")
+}
+
+tasks.named("runKtlintCheckOverMainSourceSet") {
+  dependsOn(tasks.named("openApiGenerate"))
 }
 
 ktlint {

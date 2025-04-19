@@ -16,6 +16,7 @@ include(
   ":adapters:outbound:notification",
   ":adapters:outbound:messaging",
   ":adapters:outbound:external-api",
+  ":shared",
 )
 
 buildCache {
@@ -30,3 +31,5 @@ include("adapters:inbound:api-rest")
 findProject(":adapters:inbound:messaging")?.name = "messaging"
 findProject(":adapters:inbound:api-rest")?.name = "api-rest"
 findProject(":adapters:outbound:persistence")?.name = "persistence"
+
+include("shared")

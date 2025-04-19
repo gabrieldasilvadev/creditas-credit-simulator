@@ -4,13 +4,13 @@ import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.simulationdomain.model.SimulateLoanAggregate
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.SimulationResult
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "simulation")
 data class LoanSimulationDocument(

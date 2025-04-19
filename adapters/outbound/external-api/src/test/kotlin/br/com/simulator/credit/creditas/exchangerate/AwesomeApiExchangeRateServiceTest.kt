@@ -6,11 +6,11 @@ import br.com.simulator.credit.creditas.exchangerate.client.AwesomeApiClient
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 internal class AwesomeApiExchangeRateServiceTest {
   private val awesomeApiClient = mockk<AwesomeApiClient>()
@@ -50,12 +50,11 @@ internal class AwesomeApiExchangeRateServiceTest {
 
     val input = Money(BigDecimal("100.00"), usd)
 
-    val ex =
-      assertThrows(IllegalStateException::class.java) {
-        service.convert(input, brl)
-      }
+    val ex = assertThrows(IllegalStateException::class.java) {
+      service.convert(input, brl)
+    }
 
-    assertTrue(ex.message!!.contains("Falha ao buscar taxa"))
+    assertTrue(ex.message!!.contains("Failure when seeking fee for USDBRL"))
   }
 
   @Test
@@ -66,11 +65,10 @@ internal class AwesomeApiExchangeRateServiceTest {
 
     val input = Money(BigDecimal("100.00"), usd)
 
-    val ex =
-      assertThrows(IllegalStateException::class.java) {
-        service.convert(input, brl)
-      }
+    val ex = assertThrows(IllegalStateException::class.java) {
+      service.convert(input, brl)
+    }
 
-    assertTrue(ex.message!!.contains("Taxa inválida"))
+    assertTrue(ex.message!!.contains("Invalid rate: 'INVALID' to USDBRL"))
   }
 }

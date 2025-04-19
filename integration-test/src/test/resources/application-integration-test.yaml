@@ -4,12 +4,17 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/credit-test
+      connect-timeout: 5000
+      socket-timeout: 5000
+      max-wait-time: 5000
+      min-connections-per-host: 5
+      max-connections-per-host: 20
 
   cloud:
     aws:
       credentials:
-        access-key: test
-        secret-key: test
+        access-key: localstack
+        secret-key: localstack
       region:
         static: us-east-1
       endpoint: http://localhost:4566
@@ -28,3 +33,4 @@ logging:
   level:
     root: WARN
     br.com.simulator: DEBUG
+    org.springframework.data.mongodb: DEBUG

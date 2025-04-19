@@ -14,6 +14,7 @@ repositories {
 dependencies {
   implementation(project(":adapters:inbound:api-rest"))
   implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs")
   runtimeOnly("org.glassfish.jaxb:jaxb-runtime:4.0.0")
 
   rootProject.subprojects

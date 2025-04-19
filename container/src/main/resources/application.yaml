@@ -91,11 +91,19 @@ logging:
 
 cloud:
   aws:
-    messaging:
-      listener:
-        simple:
-          queue-names:
-            email-notification-queue: email-notification-queue
+    region: us-east-1
+    endpoint: http://localhost:4566
+    credentials:
+      access-key: localstack
+      secret-key: localstack
+    sns:
+      topics:
+        emailNotificationTopic: "arn:aws:sns:us-east-1:000000000000:simulation-completed-topic"
+    sqs:
+      queues:
+        emailNotificationQueue: "email-notification-queue"
+        bulkSimulationQueue: "bulk-simulation-queue"
+
 
 internal:
   simulation:

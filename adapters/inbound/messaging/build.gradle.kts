@@ -11,7 +11,11 @@ repositories {
 
 dependencies {
   implementation(project(":adapters:outbound:notification"))
+  implementation(project(":adapters:outbound:persistence"))
+  implementation(project(":adapters:inbound:api-rest"))
+  implementation(project(":application"))
   implementation(project(":infrastructure"))
+  implementation(project(":shared"))
   implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs")
   testImplementation(kotlin("test"))
 }

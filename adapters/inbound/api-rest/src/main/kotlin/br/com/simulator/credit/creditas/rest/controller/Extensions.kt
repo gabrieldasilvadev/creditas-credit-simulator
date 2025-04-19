@@ -2,13 +2,14 @@ package br.com.simulator.credit.creditas.rest.controller
 
 import br.com.simulator.credit.creditas.command.SimulateLoanCommand
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto
+import br.com.simulator.credit.creditas.command.dto.LoanSimulationHttpResponse
+import br.com.simulator.credit.creditas.commondomain.toMoney
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
-import br.com.simulator.credit.creditas.commondomain.toMoney
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
-import br.com.simulator.credit.creditas.dto.LoanSimulationHttpResponse
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
 import br.com.simulator.credit.creditas.simulationdomain.policy.InterestRatePolicy
+import br.com.simulator.credit.creditas.simulationdomain.policy.PolicyType
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationRequestDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationResponseDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationResponseSourceDto
@@ -20,7 +21,7 @@ fun LoanSimulationRequestDto.toCommand(interestRatePolicy: InterestRatePolicy) =
     amount = this.loanAmount.amount.toMoney(),
     customerInfo = CustomerInfo(this.customerInfo.birthDate, this.customerInfo.email),
     termInMonths = Months(this.months),
-    policyType = interestRatePolicy,
+    interestRatePolicy = interestRatePolicy,
     sourceCurrency = Currency((this.sourceCurrency ?: Currency.BRL).toString()),
     targetCurrency = Currency((this.targetCurrency ?: Currency.BRL).toString()),
   )
@@ -60,16 +61,18 @@ fun LoanSimulationHttpResponse.toResponseDto(): LoanSimulationResponseDto =
       ),
   )
 
-fun LoanSimulationRequestDto.toCommandDto(interestRatePolicy: InterestRatePolicy): LoanSimulationCommandDto =
-  LoanSimulationCommandDto(
+fun LoanSimulationRequestDto.toCommandDto(interestRatePolicy: InterestRatePolicy): LoanSimulationCommandDto {
+  val customerInfo = CustomerInfo(
+    birthDate = this.customerInfo.birthDate,
+    customerEmail = this.customerInfo.email,
+  )
+  return LoanSimulationCommandDto(
     loanAmount = Money(this.loanAmount.amount, Currency(this.loanAmount.currency)),
-    customerInfo =
-      CustomerInfo(
-        birthDate = this.customerInfo.birthDate,
-        customerEmail = this.customerInfo.email,
-      ),
+    customerInfo = customerInfo,
     months = this.months,
-    policyType = interestRatePolicy,
+    interestRate = interestRatePolicy.annualInterestRate(customerInfo).toMoney(),
     sourceCurrency = this.sourceCurrency ?: Currency.BRL.code,
     targetCurrency = this.targetCurrency ?: Currency.BRL.code,
+    policyType = this.policyType?.let { PolicyType.entryOf(it.value) } ?: PolicyType.AGE_BASED,
   )
+}

@@ -7,17 +7,20 @@ data class LoanSimulationData(
   val loanAmount: Money,
   val duration: Months,
   val applicant: CustomerInfo,
+  val annualInterestRate: Money,
 ) {
   companion object {
     fun from(
       loanAmount: Money,
       duration: Months,
       applicant: CustomerInfo,
+      annualInterestRate: Money,
     ): LoanSimulationData {
       return LoanSimulationData(
         loanAmount = loanAmount,
         duration = duration,
         applicant = applicant,
+        annualInterestRate = annualInterestRate,
       )
     }
   }

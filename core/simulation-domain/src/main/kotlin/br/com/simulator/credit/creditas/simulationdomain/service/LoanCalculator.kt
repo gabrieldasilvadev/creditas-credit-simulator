@@ -16,7 +16,7 @@ object LoanCalculator {
       Simulation.create(
         loanAmount = LoanAmount(loanAmount),
         months = months,
-        annualRate = annualRate.toBigDecimal(),
+        annualRate = annualRate,
       )
     return simulation.calculate()
   }

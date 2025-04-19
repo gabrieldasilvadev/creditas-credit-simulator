@@ -1,8 +1,9 @@
 package br.com.simulator.credit.creditas.rest.controller
 
 import br.com.simulator.credit.creditas.command.bulk.StartBulkSimulationCommand
+import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.persistence.adapter.BulkSimulationPersistenceAdapter
-import br.com.simulator.credit.creditas.rest.config.PolicyConfiguration
+import br.com.simulator.credit.creditas.shared.policy.PolicyConfiguration
 import br.com.simulator.credit.creditas.simulationdomain.policy.PolicyType
 import br.com.simulator.credit.openapi.web.api.CreditSimulationApi
 import br.com.simulator.credit.openapi.web.dto.BulkLoanSimulationRequestDto
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@Monitorable("LoanSimulationController")
 class LoanSimulationController(
   private val mediator: Mediator,
   private val policyConfiguration: PolicyConfiguration,
@@ -25,11 +27,11 @@ class LoanSimulationController(
   override suspend fun simulateLoan(
     loanSimulationRequestDto: LoanSimulationRequestDto,
   ): ResponseEntity<LoanSimulationResponseDto> {
-      val interestRatePolicy =
+    val interestRatePolicy =
       policyConfiguration.resolve(
         PolicyType.entryOf(
-          loanSimulationRequestDto.policyType?.value ?: PolicyType.FIXED.value
-        )
+          loanSimulationRequestDto.policyType?.value ?: PolicyType.FIXED.value,
+        ),
       )
     val simulationHttpResponse = mediator.send(loanSimulationRequestDto.toCommand(interestRatePolicy))
     return ResponseEntity.ok(simulationHttpResponse.toResponseDto())

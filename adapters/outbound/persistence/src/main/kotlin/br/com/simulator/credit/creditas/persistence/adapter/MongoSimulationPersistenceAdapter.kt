@@ -8,7 +8,6 @@ import br.com.simulator.credit.creditas.simulationdomain.model.ports.SimulationP
 import org.springframework.stereotype.Component
 
 @Component
-
 @Monitorable("MongoSimulationPersistenceAdapter")
 class MongoSimulationPersistenceAdapter(
   private val simulationMongoRepository: SimulationMongoRepository,

@@ -8,7 +8,7 @@ import java.util.Optional
 import java.util.UUID
 
 @Component
-@Monitorable
+@Monitorable("BulkSimulationPersistenceAdapter")
 class BulkSimulationPersistenceAdapter(
   private val bulkSimulationMongoRepository: BulkSimulationMongoRepository,
 ) {

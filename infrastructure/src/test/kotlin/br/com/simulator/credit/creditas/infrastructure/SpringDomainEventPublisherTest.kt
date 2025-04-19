@@ -1,54 +1,51 @@
 package br.com.simulator.credit.creditas.infrastructure
 
-import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
-import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
-import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
+import br.com.simulator.credit.creditas.commondomain.abstractions.DomainEvent
 import br.com.simulator.credit.creditas.infrastructure.events.SpringDomainEventPublisher
-import br.com.simulator.credit.creditas.simulationdomain.api.events.LoanSimulationInputDataEvent
-import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationCompletedEvent
-import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationResultEvent
-import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
-import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanSimulationData
-import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.SimulationResult
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.context.ApplicationEventPublisher
-import java.math.BigDecimal
-import java.time.LocalDate
 
 internal class SpringDomainEventPublisherTest {
-  private val mockPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
-  private val domainPublisher = SpringDomainEventPublisher(mockPublisher)
+
+  private val springPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
+  private lateinit var domainPublisher: SpringDomainEventPublisher
+
+  data class DummyEvent(val name: String) : DomainEvent {
+    override val aggregateId = "123"
+    override val occurredOn = System.currentTimeMillis()
+  }
+
+  @BeforeEach
+  fun setUp() {
+    domainPublisher = SpringDomainEventPublisher(springPublisher)
+  }
 
   @Test
-  fun `should publish SimulationCompletedEvent`() =
-    runTest {
-      val application =
-        LoanSimulationData(
-          loanAmount = Money(BigDecimal("10000.00"), Currency.BRL),
-          duration = Months(12),
-          applicant = CustomerInfo(LocalDate.of(1990, 1, 1), "test@example.com"),
-        )
+  fun `should publish single event`() {
+    val event = DummyEvent("one")
 
-      val result =
-        SimulationResult(
-          totalPayment = Money(BigDecimal("12000.00"), Currency.BRL),
-          monthlyInstallment = Money(BigDecimal("1000.00"), Currency.BRL),
-          totalInterest = Money(BigDecimal("2000.00"), Currency.BRL),
-        )
+    domainPublisher.publish(event)
 
-      val event =
-        SimulationCompletedEvent(
-          LoanSimulationInputDataEvent.from(application),
-          SimulationResultEvent.from(result),
-          System.currentTimeMillis(),
-          "12345",
-        )
-
-      domainPublisher.publish(event)
-
-      verify { mockPublisher.publishEvent(event) }
+    verify(exactly = 1) {
+      springPublisher.publishEvent(event)
     }
+  }
+
+  @Test
+  fun `should publish all events`() {
+    val events = listOf(
+      DummyEvent("one"),
+      DummyEvent("two"),
+      DummyEvent("three")
+    )
+
+    domainPublisher.publishAll(events)
+
+    verify(exactly = 3) {
+      springPublisher.publishEvent(any<DomainEvent>())
+    }
+  }
 }

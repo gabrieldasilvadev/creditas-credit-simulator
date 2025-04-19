@@ -16,6 +16,7 @@ dependencies {
   implementation(project(":adapters:outbound:external-api"))
   implementation(project(":adapters:outbound:persistence"))
   implementation(project(":infrastructure"))
+  implementation(project(":shared"))
   testImplementation(kotlin("test"))
 }
 

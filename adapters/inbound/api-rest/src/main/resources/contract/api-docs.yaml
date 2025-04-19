@@ -42,6 +42,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
         - credit-simulation
+
   /simulations/bulk:
     post:
       summary: Iniciar simulações em lote
@@ -68,7 +69,8 @@ paths:
           description: Erro interno no servidor
       tags:
         - credit-simulation
-  '/simulations/bulk/{bulkId}':
+
+  /simulations/bulk/{bulkId}:
     get:
       summary: Consultar status de simulação em lote
       description: |
@@ -93,6 +95,7 @@ paths:
           description: ID de simulação em lote não encontrado
       tags:
         - credit-simulation
+
 components:
   schemas:
     LoanSimulationRequest:
@@ -127,6 +130,7 @@ components:
         - loan_amount
         - customer_info
         - months
+
     BulkLoanSimulationRequest:
       type: object
       description: Requisição para simulações de crédito em lote
@@ -138,6 +142,7 @@ components:
           description: Lista de simulações a serem processadas
       required:
         - simulations
+
     LoanSimulationResponse:
       type: object
       description: Resposta com os dados calculados da simulação
@@ -162,6 +167,7 @@ components:
               $ref: '#/components/schemas/Money'
             annual_interest_rate:
               $ref: '#/components/schemas/Rate'
+
     BulkSimulationInitResponse:
       type: object
       description: Resposta com o ID de controle da simulação em lote
@@ -181,6 +187,7 @@ components:
       required:
         - bulk_id
         - status
+
     BulkSimulationStatusResponse:
       type: object
       description: Resposta com o status e resultados da simulação em lote
@@ -210,6 +217,7 @@ components:
         - status
         - processed
         - total
+
     CustomerInfoRequest:
       type: object
       description: Informações do cliente para simulação
@@ -227,6 +235,7 @@ components:
       required:
         - birth_date
         - email
+
     Money:
       type: object
       description: Representação de valor monetário
@@ -243,10 +252,12 @@ components:
       required:
         - amount
         - currency
+
     Rate:
       type: string
       pattern: '^(?!0\.00$)(?:[1-9]\d*(\.\d{2})?|0\.\d*[1-9]\d*)$'
       description: Taxa de juros percentual anual representada como string com 2 casas decimais
+
     ErrorResponse:
       type: object
       description: Estrutura padrão para mensagens de erro

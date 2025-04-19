@@ -1,6 +1,7 @@
 package br.com.simulator.credit.creditas.simulationdomain.model
 
 import br.com.simulator.credit.creditas.commondomain.abstractions.DomainObject
+import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanAmount
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.SimulationResult
@@ -28,9 +29,9 @@ class Simulation private constructor(
     fun create(
       loanAmount: LoanAmount,
       months: Months,
-      annualRate: BigDecimal,
+      annualRate: Money,
     ): Simulation {
-      val monthlyRateFromAnnual = annualRate.divide(MONTHS_IN_YEAR, MathContext.DECIMAL128)
+      val monthlyRateFromAnnual = annualRate.toBigDecimal().divide(MONTHS_IN_YEAR, MathContext.DECIMAL128)
       return Simulation(loanAmount, months, monthlyRateFromAnnual)
     }
   }

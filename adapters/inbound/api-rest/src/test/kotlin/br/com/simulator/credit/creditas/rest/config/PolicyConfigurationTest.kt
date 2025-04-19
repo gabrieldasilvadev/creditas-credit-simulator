@@ -1,5 +1,6 @@
 package br.com.simulator.credit.creditas.rest.config
 
+import br.com.simulator.credit.creditas.shared.policy.PolicyConfiguration
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
 import br.com.simulator.credit.creditas.simulationdomain.policy.AgeBasedRatePolicy
 import br.com.simulator.credit.creditas.simulationdomain.policy.FixedRatePolicy
@@ -12,7 +13,7 @@ import java.time.LocalDate
 internal class PolicyConfigurationTest {
   private val fixedPolicy = FixedRatePolicy(BigDecimal("0.03"))
   private val ageBasedPolicy = AgeBasedRatePolicy()
-  private val config = PolicyConfiguration(fixedPolicy, ageBasedPolicy)
+  private val config = PolicyConfiguration(listOf(fixedPolicy, ageBasedPolicy))
 
   private val dummyApplication =
     CustomerInfo(

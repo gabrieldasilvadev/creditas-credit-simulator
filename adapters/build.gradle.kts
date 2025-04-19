@@ -13,6 +13,7 @@ subprojects {
   dependencies {
     implementation(project(":core:simulation-domain"))
     implementation(project(":core:common-domain"))
+    implementation(project(":infrastructure"))
     implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.3.0"))
   }
 }

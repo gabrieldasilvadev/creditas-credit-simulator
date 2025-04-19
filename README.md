@@ -86,6 +86,13 @@ O projeto segue os princípios da arquitetura hexagonal (Ports and Adapters), co
 - `adapters`: entrada (REST, mensagens), saída (Mongo, APIs externas)
 - `container`: ponto de entrada da aplicação
 
+Essa arquitetura promove escalabilidade e resiliência, permitindo que o envio de e-mails seja assíncrono e tolerante a falhas.
+
+🔧 Para ambientes locais, a infraestrutura é simulada com **LocalStack**, incluindo tópicos, filas e permissões configuradas por scripts `infra/setup.sh`.
+
+➡️ Esta implementação atende ao bônus do case, que solicita a abstração de mensageria com SQS/Kafka — neste projeto, a mensageria foi de fato **implementada**.
+
+
 ---
 
 ## 🧠 Políticas de Juros
@@ -139,8 +146,17 @@ Expose: `GET /actuator/prometheus`
 
 ## 📬 Notificações por Email
 
-Simulação envia e-mail com resultado via SQS (mockado/local). Estrutura pronta para mensageria assíncrona.
+O sistema implementa uma funcionalidade de notificação por e-mail baseada em eventos, utilizando mensageria real com AWS SNS + SQS:
 
+- Quando uma simulação de crédito é concluída, um **evento é publicado no SNS**.
+- Esse evento é enviado para uma **fila SQS**, que age como **desacoplamento** entre o produtor e o consumidor.
+- Um listener consome essa fila e **envia o e-mail** com os resultados da simulação.
+
+Essa arquitetura promove escalabilidade e resiliência, permitindo que o envio de e-mails seja assíncrono e tolerante a falhas.
+
+🔧 Para ambientes locais, a infraestrutura é simulada com **LocalStack**, incluindo tópicos, filas e permissões configuradas por scripts `infra/setup.sh`.
+
+➡️ Esta implementação atende ao bônus do case, que solicita a abstração de mensageria com SQS/Kafka — neste projeto, a mensageria foi de fato **implementada**.
 ---
 
 ## ⚙️ Variáveis importantes

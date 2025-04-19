@@ -22,6 +22,7 @@ kotlin {
 
 dependencies {
   implementation(project(":container"))
+  implementation(project(":shared"))
 
   testImplementation("org.springframework.boot:spring-boot-starter-test") {
     exclude(group = "org.junit.vintage", module = "junit-vintage-engine")

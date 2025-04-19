@@ -1,17 +1,27 @@
+version: '3.8'
 services:
+  mongo:
+    image: mongo:6.0.13
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=credit-test
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
   localstack:
     image: localstack/localstack:3.3
     ports:
       - "4566:4566"
     environment:
       - SERVICES=sqs,sns
-      - DEBUG=1
+      - DEBUG=0
       - DEFAULT_REGION=us-east-1
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
-  mongo:
-    image: mongo:6.0.13
-    ports:
-      - "27017:27017"
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 3

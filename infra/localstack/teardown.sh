@@ -1,73 +1,52 @@
 #!/bin/bash
 set -e
 
-echo "🧹 Removendo recursos do LocalStack (via docker exec)..."
+echo "🧹 Removendo todos os recursos do LocalStack..."
 
 AWS_REGION="us-east-1"
 CONTAINER_NAME="localstack"
 
-### SNS Topic
+# Função para deletar fila SQS
+delete_queue() {
+  local queue_name="$1"
+  echo "🔍 Verificando fila: $queue_name"
+  local queue_url=$(docker exec -i $CONTAINER_NAME awslocal sqs get-queue-url \
+    --queue-name "$queue_name" --region "$AWS_REGION" --output text 2>/dev/null || echo "")
 
-TOPIC_NAME="credit-simulation-topic"
-TOPIC_ARN=$(docker exec -i $CONTAINER_NAME awslocal sns list-topics \
-  --region "$AWS_REGION" \
-  --query "Topics[?contains(TopicArn, '$TOPIC_NAME')].TopicArn" \
-  --output text)
+  if [ -z "$queue_url" ]; then
+    echo "⚠️ Fila '$queue_name' não encontrada."
+  else
+    echo "🗑️ Deletando fila: $queue_url"
+    docker exec -i $CONTAINER_NAME awslocal sqs delete-queue \
+      --queue-url "$queue_url" --region "$AWS_REGION"
+  fi
+}
 
-if [ -z "$TOPIC_ARN" ]; then
-  echo "⚠️ Tópico '$TOPIC_NAME' não encontrado."
-else
-  echo "🗑️ Deletando tópico SNS: $TOPIC_ARN"
-  docker exec -i $CONTAINER_NAME awslocal sns delete-topic \
-    --topic-arn "$TOPIC_ARN" --region "$AWS_REGION"
-fi
+# Função para deletar tópico SNS
+delete_topic() {
+  local topic_name="$1"
+  echo "🔍 Verificando tópico: $topic_name"
+  local topic_arn=$(docker exec -i $CONTAINER_NAME awslocal sns list-topics --region "$AWS_REGION" \
+    --query "Topics[?contains(TopicArn, '$topic_name')].TopicArn" --output text)
 
-### Fila credit-simulation-queue
+  if [ -z "$topic_arn" ]; then
+    echo "⚠️ Tópico '$topic_name' não encontrado."
+  else
+    echo "🗑️ Deletando tópico SNS: $topic_arn"
+    docker exec -i $CONTAINER_NAME awslocal sns delete-topic \
+      --topic-arn "$topic_arn" --region "$AWS_REGION"
+  fi
+}
 
-SIMULATION_QUEUE_NAME="credit-simulation-queue"
-SIMULATION_QUEUE_URL=$(docker exec -i $CONTAINER_NAME awslocal sqs get-queue-url \
-  --queue-name "$SIMULATION_QUEUE_NAME" \
-  --region "$AWS_REGION" \
-  --output text 2>/dev/null || echo "")
+# Deletar tópicos
+delete_topic "credit-simulation-topic"
+delete_topic "simulation-completed-topic"
 
-if [ -z "$SIMULATION_QUEUE_URL" ]; then
-  echo "⚠️ Fila '$SIMULATION_QUEUE_NAME' não encontrada."
-else
-  echo "🗑️ Deletando fila SQS: $SIMULATION_QUEUE_URL"
-  docker exec -i $CONTAINER_NAME awslocal sqs delete-queue \
-    --queue-url "$SIMULATION_QUEUE_URL" --region "$AWS_REGION"
-fi
-
-### Fila de e-mail
-
-EMAIL_QUEUE_NAME="email-notification-queue"
-EMAIL_QUEUE_URL=$(docker exec -i $CONTAINER_NAME awslocal sqs get-queue-url \
-  --queue-name "$EMAIL_QUEUE_NAME" \
-  --region "$AWS_REGION" \
-  --output text 2>/dev/null || echo "")
-
-if [ -z "$EMAIL_QUEUE_URL" ]; then
-  echo "⚠️ Fila '$EMAIL_QUEUE_NAME' não encontrada."
-else
-  echo "🗑️ Deletando fila de e-mail: $EMAIL_QUEUE_URL"
-  docker exec -i $CONTAINER_NAME awslocal sqs delete-queue \
-    --queue-url "$EMAIL_QUEUE_URL" --region "$AWS_REGION"
-fi
-
-### DLQ da fila de e-mail
-
-EMAIL_DLQ_NAME="email-notification-dlq"
-EMAIL_DLQ_URL=$(docker exec -i $CONTAINER_NAME awslocal sqs get-queue-url \
-  --queue-name "$EMAIL_DLQ_NAME" \
-  --region "$AWS_REGION" \
-  --output text 2>/dev/null || echo "")
-
-if [ -z "$EMAIL_DLQ_URL" ]; then
-  echo "⚠️ DLQ '$EMAIL_DLQ_NAME' não encontrada."
-else
-  echo "🗑️ Deletando DLQ: $EMAIL_DLQ_URL"
-  docker exec -i $CONTAINER_NAME awslocal sqs delete-queue \
-    --queue-url "$EMAIL_DLQ_URL" --region "$AWS_REGION"
-fi
+# Deletar filas
+delete_queue "credit-simulation-queue"
+delete_queue "email-notification-queue"
+delete_queue "email-notification-dlq"
+delete_queue "bulk-simulation-queue"
+delete_queue "bulk-simulation-dlq"
 
 echo "✅ Todos os recursos foram removidos com sucesso!"

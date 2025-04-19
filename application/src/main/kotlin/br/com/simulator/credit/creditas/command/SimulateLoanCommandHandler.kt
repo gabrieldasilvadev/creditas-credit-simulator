@@ -1,8 +1,9 @@
 package br.com.simulator.credit.creditas.command
 
+import br.com.simulator.credit.creditas.command.dto.LoanSimulationHttpResponse
+import br.com.simulator.credit.creditas.command.factory.LoanAmountFactory
 import br.com.simulator.credit.creditas.commondomain.abstractions.DomainEventPublisher
-import br.com.simulator.credit.creditas.dto.LoanSimulationHttpResponse
-import br.com.simulator.credit.creditas.factory.LoanAmountFactory
+import br.com.simulator.credit.creditas.commondomain.toMoney
 import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.simulationdomain.model.SimulateLoanAggregate
 import br.com.simulator.credit.creditas.simulationdomain.model.ports.SimulationPersistencePort
@@ -21,16 +22,17 @@ class SimulateLoanCommandHandler(
   private val loanAmountFactory: LoanAmountFactory,
   private val simulationPersistencePort: SimulationPersistencePort,
 ) : CommandWithResultHandler<SimulateLoanCommand, LoanSimulationHttpResponse> {
+
   private val logger: Logger = LoggerFactory.getLogger(SimulateLoanCommandHandler::class.java)
 
   override suspend fun handle(command: SimulateLoanCommand): LoanSimulationHttpResponse {
     logger.info("Starting loan simulation: $command")
     val loanAmount = loanAmountFactory.create(command.amount, command.sourceCurrency, command.targetCurrency)
     val applicant = CustomerInfo(command.customerInfo.birthDate, command.customerInfo.customerEmail)
-
+    val annualInterestRate = command.interestRatePolicy.annualInterestRate(applicant)
     val simulation =
-      SimulateLoanService.of(command.policyType).execute(
-        LoanSimulationData.from(loanAmount.value, command.termInMonths, applicant),
+      SimulateLoanService.execute(
+        LoanSimulationData.from(loanAmount.value, command.termInMonths, applicant, annualInterestRate.toMoney()),
       )
 
     logger.info("Loan simulation completed: $simulation")
@@ -39,7 +41,7 @@ class SimulateLoanCommandHandler(
 
     runCatching { simulationPersistencePort.save(aggregate) }
       .onSuccess { domainEventPublisher.publishAll(simulation.getAndClearEvents()) }
-      .onFailure { println("Error saving simulation: ${it.message}") }
+      .onFailure { logger.error("Error saving simulation: ${it.message} | cause: ${it.cause}") }
       .getOrThrow()
 
     logger.info("Loan simulation saved successfully: $aggregate")
@@ -52,7 +54,7 @@ class SimulateLoanCommandHandler(
           totalPayment = aggregate.simulationResult.totalPayment,
           monthlyInstallment = aggregate.simulationResult.monthlyInstallment,
           totalInterest = aggregate.simulationResult.totalInterest,
-          annualInterestRate = command.policyType.annualInterestRate(applicant),
+          annualInterestRate = command.interestRatePolicy.annualInterestRate(applicant).toMoney(),
         ),
     )
   }

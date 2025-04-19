@@ -16,7 +16,7 @@ internal class SimulationTest {
       Simulation.create(
         loanAmount = LoanAmount(Money("10000.00")),
         months = Months(12),
-        annualRate = BigDecimal("0.03"),
+        annualRate = Money("0.03"),
       )
 
     val result = simulation.calculate()
@@ -32,7 +32,7 @@ internal class SimulationTest {
       Simulation.create(
         loanAmount = LoanAmount(Money("-1000")),
         months = Months(12),
-        annualRate = BigDecimal("0.03"),
+        annualRate = Money("0.03"),
       )
     }
   }
