@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.rest.controller
 
-import br.com.simulator.credit.creditas.command.SimulateLoanCommand
+import br.com.simulator.credit.creditas.command.single.SimulateLoanCommand
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto
 import br.com.simulator.credit.creditas.command.dto.LoanSimulationHttpResponse
 import br.com.simulator.credit.creditas.commondomain.toMoney
@@ -62,10 +62,11 @@ fun LoanSimulationHttpResponse.toResponseDto(): LoanSimulationResponseDto =
   )
 
 fun LoanSimulationRequestDto.toCommandDto(interestRatePolicy: InterestRatePolicy): LoanSimulationCommandDto {
-  val customerInfo = CustomerInfo(
-    birthDate = this.customerInfo.birthDate,
-    customerEmail = this.customerInfo.email,
-  )
+  val customerInfo =
+    CustomerInfo(
+      birthDate = this.customerInfo.birthDate,
+      customerEmail = this.customerInfo.email,
+    )
   return LoanSimulationCommandDto(
     loanAmount = Money(this.loanAmount.amount, Currency(this.loanAmount.currency)),
     customerInfo = customerInfo,

@@ -16,6 +16,7 @@ class SimulationResultEmailService(
   private val sendEmailToggle: String,
 ) : EmailSender<EmailContent> {
   private val logger = LoggerFactory.getLogger(SimulationResultEmailService::class.java)
+
   override fun send(content: EmailContent) {
     val message =
       SimpleMailMessage().apply {

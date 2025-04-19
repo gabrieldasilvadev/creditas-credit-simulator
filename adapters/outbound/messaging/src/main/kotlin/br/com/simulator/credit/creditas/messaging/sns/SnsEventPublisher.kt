@@ -17,7 +17,6 @@ class SnsEventPublisher(
   private val snsClient: SnsClient,
   private val objectMapper: ObjectMapper,
 ) : EventPublisher {
-
   private val logger = org.slf4j.LoggerFactory.getLogger(SnsEventPublisher::class.java)
 
   @Retryable(

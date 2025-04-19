@@ -7,10 +7,10 @@ import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.amazonaws.services.sns.model.CreateTopicRequest
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import com.amazonaws.services.sqs.model.CreateQueueRequest
-import java.time.Duration
 import org.awaitility.Awaitility
 import org.awaitility.core.ConditionTimeoutException
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 object AwsLocalstackInitializer {
   private const val REGION = "us-east-1"
@@ -19,7 +19,10 @@ object AwsLocalstackInitializer {
 
   private val logger = LoggerFactory.getLogger(AwsLocalstackInitializer::class.java)
 
-  fun setupInfra(host: String, port: Int) {
+  fun setupInfra(
+    host: String,
+    port: Int,
+  ) {
     val endpoint = "http://$host:$port"
     logger.info("Configuring AWS with Endpoint: $endpoint")
 
@@ -48,36 +51,41 @@ object AwsLocalstackInitializer {
     try {
       val credentials = BasicAWSCredentials(ACCESS_KEY, SECRET_KEY)
 
-      val sqsClient = AmazonSQSClientBuilder.standard()
-        .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(endpoint, REGION))
-        .withCredentials(AWSStaticCredentialsProvider(credentials))
-        .build()
+      val sqsClient =
+        AmazonSQSClientBuilder.standard()
+          .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(endpoint, REGION))
+          .withCredentials(AWSStaticCredentialsProvider(credentials))
+          .build()
 
-      val snsClient = AmazonSNSClientBuilder.standard()
-        .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(endpoint, REGION))
-        .withCredentials(AWSStaticCredentialsProvider(credentials))
-        .build()
+      val snsClient =
+        AmazonSNSClientBuilder.standard()
+          .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(endpoint, REGION))
+          .withCredentials(AWSStaticCredentialsProvider(credentials))
+          .build()
 
       val queueAttributes = HashMap<String, String>()
       queueAttributes["ReceiveMessageWaitTimeSeconds"] = "20"
       queueAttributes["VisibilityTimeout"] = "30"
 
-      val createQueueRequest = CreateQueueRequest()
-        .withQueueName("credit-simulator-queue")
-        .withAttributes(queueAttributes)
+      val createQueueRequest =
+        CreateQueueRequest()
+          .withQueueName("credit-simulator-queue")
+          .withAttributes(queueAttributes)
 
       try {
         val queueUrl = sqsClient.createQueue(createQueueRequest).queueUrl
         logger.info("SQS line created: $queueUrl")
 
-        val createTopicRequest = CreateTopicRequest()
-          .withName("credit-simulator-topic")
+        val createTopicRequest =
+          CreateTopicRequest()
+            .withName("credit-simulator-topic")
 
         val topicArn = snsClient.createTopic(createTopicRequest).topicArn
         logger.info("SNS Topic created: $topicArn")
 
-        val queueArn = sqsClient.getQueueAttributes(queueUrl, listOf("QueueArn"))
-          .attributes["QueueArn"]
+        val queueArn =
+          sqsClient.getQueueAttributes(queueUrl, listOf("QueueArn"))
+            .attributes["QueueArn"]
 
         snsClient.subscribe(topicArn, "sqs", queueArn)
         logger.info("Queue registered in the Topic SNS")

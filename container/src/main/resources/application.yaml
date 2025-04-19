@@ -107,6 +107,8 @@ cloud:
 
 internal:
   simulation:
+    concurrency:
+      limit: 100
     bulk:
       size: 500
       buffer: 1000
@@ -126,10 +128,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus
+        include: "*"
   metrics:
     tags:
       application: credit-simulator
+    enable:
+      executor: true
   endpoint:
     prometheus:
       access: unrestricted

@@ -1,7 +1,6 @@
 package br.com.simulator.credit.creditas.command.dto
 
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
-import java.math.BigDecimal
 
 data class LoanSimulationHttpResponse(
   val source: Source,

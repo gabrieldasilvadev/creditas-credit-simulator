@@ -10,10 +10,7 @@ import java.util.UUID
 
 class SimulateLoanService {
   companion object {
-
-
     fun execute(loanSimulationData: LoanSimulationData): Simulation {
-
       val simulation =
         Simulation.create(
           loanAmount = LoanAmount(loanSimulationData.loanAmount),

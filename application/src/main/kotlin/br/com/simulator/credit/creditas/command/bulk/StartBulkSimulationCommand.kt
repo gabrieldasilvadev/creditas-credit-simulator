@@ -1,6 +1,6 @@
 package br.com.simulator.credit.creditas.command.bulk
 
-import br.com.simulator.credit.creditas.command.SimulateLoanCommand
+import br.com.simulator.credit.creditas.command.single.SimulateLoanCommand
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Months
@@ -13,7 +13,7 @@ import java.util.UUID
 
 class StartBulkSimulationCommand(
   val bulkId: UUID = UUID.randomUUID(),
-  val simulations: List<LoanSimulationCommandDto>
+  val simulations: List<LoanSimulationCommandDto>,
 ) : Command
 
 data class LoanSimulationCommandDto(
@@ -26,7 +26,6 @@ data class LoanSimulationCommandDto(
   val policyType: PolicyType,
 ) {
   companion object {
-
     fun BulkSimulationMessage.LoanSimulationMessage.toLoanSimulationCommandDto(policyType: PolicyType) =
       LoanSimulationCommandDto(
         loanAmount = this.loanAmount,

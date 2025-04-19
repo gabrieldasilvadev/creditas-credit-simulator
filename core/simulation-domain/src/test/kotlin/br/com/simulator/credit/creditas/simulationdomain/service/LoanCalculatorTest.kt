@@ -7,7 +7,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
-import org.junit.jupiter.api.Disabled
 
 internal class LoanCalculatorTest {
   @Test

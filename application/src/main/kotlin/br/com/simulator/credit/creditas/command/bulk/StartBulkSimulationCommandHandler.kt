@@ -18,7 +18,6 @@ class StartBulkSimulationCommandHandler(
   private val repository: BulkSimulationPersistenceAdapter,
   private val publisher: SqsBulkSimulationQueuePublisherAdapter,
 ) : CommandHandler<StartBulkSimulationCommand> {
-
   private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
   override suspend fun handle(command: StartBulkSimulationCommand) {
@@ -54,7 +53,7 @@ class StartBulkSimulationCommandHandler(
         simulations = simulations,
       ).also {
         logger.info("Bulk simulation message created: $it")
-      }
+      },
     )
   }
 }

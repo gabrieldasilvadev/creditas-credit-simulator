@@ -6,45 +6,58 @@ import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto.Co
 import br.com.simulator.credit.creditas.persistence.adapter.BulkSimulationPersistenceAdapter
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationResponseDto
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationStatus
+import br.com.simulator.credit.creditas.property.BulkSimulationProperties
 import br.com.simulator.credit.creditas.shared.messages.BulkSimulationMessage
 import br.com.simulator.credit.creditas.shared.policy.PolicyConfiguration
 import com.trendyol.kediatr.Mediator
 import io.awspring.cloud.sqs.annotation.SqsListener
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 class BulkSimulationListener(
   private val repository: BulkSimulationPersistenceAdapter,
   private val mediator: Mediator,
-  private val policyConfiguration: PolicyConfiguration
+  private val policyConfiguration: PolicyConfiguration,
+  private val bulkSimulationProperties: BulkSimulationProperties,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @SqsListener("\${cloud.aws.sqs.queues.bulkSimulationQueue}")
   fun onMessage(message: BulkSimulationMessage) =
     runBlocking {
+      processMessage(message)
+    }
+
+  private suspend fun processMessage(message: BulkSimulationMessage) =
+    coroutineScope {
       val processedCount = AtomicInteger(0)
       val total = message.simulations.size
 
-      message.simulations.chunked(10).forEach { batch ->
-        batch.map {
-          async(Dispatchers.IO) {
-            process(
-              it.toLoanSimulationCommandDto(it.policyType),
-              message.bulkId,
-              processedCount,
-              total,
-            )
-          }
-        }.awaitAll()
-      }
+      message.simulations
+        .chunked(bulkSimulationProperties.size)
+        .asFlow()
+        .buffer(bulkSimulationProperties.buffer)
+        .collect { chunk ->
+          chunk.map { simulation ->
+            async {
+              process(
+                simulation.toLoanSimulationCommandDto(simulation.policyType),
+                message.bulkId,
+                processedCount,
+                total,
+              )
+            }
+          }.awaitAll()
+        }
     }
 
   private suspend fun process(

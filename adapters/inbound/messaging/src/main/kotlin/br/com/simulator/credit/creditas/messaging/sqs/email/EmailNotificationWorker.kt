@@ -21,7 +21,6 @@ class EmailNotificationWorker(
   private val emailSender: EmailSender<EmailContent>,
   private val objectMapper: ObjectMapper,
 ) {
-
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @Retryable(

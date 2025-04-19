@@ -6,7 +6,6 @@ import org.hamcrest.CoreMatchers.notNullValue
 import kotlin.test.Test
 
 class SimulationIntegrationTest : BaseIntegrationTest() {
-
   @Test
   fun `given valid simulation request when post to simulations then return 200`() {
     val payload =

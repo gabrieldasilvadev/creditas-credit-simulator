@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PolicyConfiguration(
-  private val policies: List<InterestRatePolicy>
+  private val policies: List<InterestRatePolicy>,
 ) {
   fun resolve(type: PolicyType): InterestRatePolicy =
     policies.firstOrNull { it.supports(type) }

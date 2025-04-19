@@ -17,41 +17,43 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
-import java.math.BigDecimal
-import java.time.LocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
 
 internal class SimulateLoanServiceTest {
-
   private val loanAmount = Money(BigDecimal("10000.00"), Currency.BRL)
   private val months = Months(12)
   private val interestRate = Money(BigDecimal("0.03"), Currency.BRL)
-  private val customer = CustomerInfo(
-    birthDate = LocalDate.of(1990, 1, 1),
-    customerEmail = "cliente@teste.com"
-  )
+  private val customer =
+    CustomerInfo(
+      birthDate = LocalDate.of(1990, 1, 1),
+      customerEmail = "cliente@teste.com",
+    )
 
   private lateinit var simulationData: LoanSimulationData
 
   @BeforeEach
   fun setUp() {
-    simulationData = LoanSimulationData(
-      loanAmount = loanAmount,
-      duration = months,
-      applicant = customer,
-      annualInterestRate = interestRate
-    )
+    simulationData =
+      LoanSimulationData(
+        loanAmount = loanAmount,
+        duration = months,
+        applicant = customer,
+        annualInterestRate = interestRate,
+      )
   }
 
   @Test
   fun `should execute simulation and register completion event`() {
     val simulation = mockk<Simulation>(relaxed = true)
-    val simulationResult = SimulationResult(
-      totalPayment = Money(BigDecimal("12000.00"), Currency.BRL),
-      monthlyInstallment = Money(BigDecimal("1000.00"), Currency.BRL),
-      totalInterest = Money(BigDecimal("2000.00"), Currency.BRL)
-    )
+    val simulationResult =
+      SimulationResult(
+        totalPayment = Money(BigDecimal("12000.00"), Currency.BRL),
+        monthlyInstallment = Money(BigDecimal("1000.00"), Currency.BRL),
+        totalInterest = Money(BigDecimal("2000.00"), Currency.BRL),
+      )
 
     mockkObject(Simulation)
     every { Simulation.create(any(), any(), any()) } returns simulation

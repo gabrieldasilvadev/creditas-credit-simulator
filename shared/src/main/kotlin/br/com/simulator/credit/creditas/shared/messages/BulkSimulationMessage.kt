@@ -2,7 +2,6 @@ package br.com.simulator.credit.creditas.shared.messages
 
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
-import br.com.simulator.credit.creditas.simulationdomain.policy.InterestRatePolicy
 import br.com.simulator.credit.creditas.simulationdomain.policy.PolicyType
 import java.time.LocalDateTime
 import java.util.UUID

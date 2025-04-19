@@ -1,4 +1,4 @@
-package br.com.simulator.credit.creditas.command
+package br.com.simulator.credit.creditas.command.single
 
 import br.com.simulator.credit.creditas.command.dto.LoanSimulationHttpResponse
 import br.com.simulator.credit.creditas.commondomain.valueobjects.Currency

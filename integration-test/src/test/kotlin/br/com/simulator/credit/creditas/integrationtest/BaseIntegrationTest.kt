@@ -6,8 +6,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.restassured.RestAssured
 import io.restassured.config.HttpClientConfig
-import java.io.File
-import java.time.Duration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -22,6 +20,8 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.DockerComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.io.File
+import java.time.Duration
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = [Application::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,18 +42,19 @@ abstract class BaseIntegrationTest {
       System.setProperty("compose.container.id", "credit-test")
     }
 
-    private val environment = DockerComposeContainer(File("docker-compose-test.yaml"))
-      .withLocalCompose(true)
-      .withExposedService(
-        MONGO_SERVICE,
-        MONGO_PORT,
-        Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60))
-      )
-      .withExposedService(
-        LOCALSTACK_SERVICE,
-        LOCALSTACK_PORT,
-        Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60))
-      )
+    private val environment =
+      DockerComposeContainer(File("docker-compose-test.yaml"))
+        .withLocalCompose(true)
+        .withExposedService(
+          MONGO_SERVICE,
+          MONGO_PORT,
+          Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)),
+        )
+        .withExposedService(
+          LOCALSTACK_SERVICE,
+          LOCALSTACK_PORT,
+          Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)),
+        )
 
     init {
       try {

@@ -6,13 +6,12 @@ import br.com.simulator.credit.creditas.exchangerate.ExchangeRateService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 internal class LoanAmountFactoryTest {
-
   private val exchangeRateService = mockk<ExchangeRateService>()
   private lateinit var factory: LoanAmountFactory
 
@@ -27,21 +26,21 @@ internal class LoanAmountFactoryTest {
     val currency = Currency.BRL
     val money = Money(amount, currency)
 
-    val result = factory.create(
-      amount = money,
-      source = currency,
-      target = currency
-    )
+    val result =
+      factory.create(
+        amount = money,
+        source = currency,
+        target = currency,
+      )
 
     assertEquals(money, result.value)
     verify(exactly = 0) {
       exchangeRateService.convert(
         Money(BigDecimal("1000.00"), Currency.USD),
-        Currency.USD
+        Currency.USD,
       )
     }
   }
-
 
   @Test
   fun `should convert amount when currencies are different`() {
@@ -60,17 +59,18 @@ internal class LoanAmountFactoryTest {
   fun `should default to BRL when source and target are null`() {
     val money = Money(BigDecimal("1500.00"), Currency.BRL)
 
-    val result = factory.create(
-      amount = money,
-      source = null,
-      target = null
-    )
+    val result =
+      factory.create(
+        amount = money,
+        source = null,
+        target = null,
+      )
 
     assertEquals(money, result.value)
     verify(exactly = 0) {
       exchangeRateService.convert(
         Money(BigDecimal("1000.00"), Currency.USD),
-        Currency.USD
+        Currency.USD,
       )
     }
   }

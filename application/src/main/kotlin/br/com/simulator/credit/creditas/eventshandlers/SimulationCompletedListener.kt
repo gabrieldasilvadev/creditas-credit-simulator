@@ -5,7 +5,6 @@ import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationCo
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,7 +16,6 @@ class SimulationCompletedListener(
   private val logger = LoggerFactory.getLogger(SimulationCompletedListener::class.java)
 
   @EventListener
-  @Async
   fun handler(event: SimulationCompletedEvent) {
     logger.info("[SimulationCompletedListener] E-MAIL received: $event")
     snsEventPublisher.publish(event, topic)

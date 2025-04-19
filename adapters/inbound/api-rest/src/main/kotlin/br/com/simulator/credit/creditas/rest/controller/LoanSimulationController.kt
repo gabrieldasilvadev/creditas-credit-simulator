@@ -12,10 +12,10 @@ import br.com.simulator.credit.openapi.web.dto.BulkSimulationStatusResponseDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationRequestDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationResponseDto
 import com.trendyol.kediatr.Mediator
-import java.util.UUID
 import org.instancio.Instancio
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @Monitorable("LoanSimulationController")

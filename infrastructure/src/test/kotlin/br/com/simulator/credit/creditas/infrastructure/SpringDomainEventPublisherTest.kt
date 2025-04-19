@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.context.ApplicationEventPublisher
 
 internal class SpringDomainEventPublisherTest {
-
   private val springPublisher = mockk<ApplicationEventPublisher>(relaxed = true)
   private lateinit var domainPublisher: SpringDomainEventPublisher
 
@@ -36,11 +35,12 @@ internal class SpringDomainEventPublisherTest {
 
   @Test
   fun `should publish all events`() {
-    val events = listOf(
-      DummyEvent("one"),
-      DummyEvent("two"),
-      DummyEvent("three")
-    )
+    val events =
+      listOf(
+        DummyEvent("one"),
+        DummyEvent("two"),
+        DummyEvent("three"),
+      )
 
     domainPublisher.publishAll(events)
 

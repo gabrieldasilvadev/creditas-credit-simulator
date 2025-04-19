@@ -1,6 +1,5 @@
 package br.com.simulator.credit.creditas.simulationdomain.policy
 
-import br.com.simulator.credit.creditas.commondomain.valueobjects.Money
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
 import org.springframework.stereotype.Component
 import java.math.BigDecimal

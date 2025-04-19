@@ -5,5 +5,6 @@ import java.math.BigDecimal
 
 interface InterestRatePolicy {
   fun supports(type: PolicyType): Boolean
+
   fun annualInterestRate(applicant: CustomerInfo): BigDecimal
 }

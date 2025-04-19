@@ -6,13 +6,12 @@ import br.com.simulator.credit.creditas.persistence.repository.BulkSimulationMon
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.Optional
-import java.util.UUID
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.Optional
+import java.util.UUID
 
 internal class BulkSimulationPersistenceAdapterTest {
-
   private val mongoRepository = mockk<BulkSimulationMongoRepository>()
   private lateinit var adapter: BulkSimulationPersistenceAdapter
 
@@ -23,13 +22,14 @@ internal class BulkSimulationPersistenceAdapterTest {
 
   @Test
   fun `should save document using repository`() {
-    val document = BulkSimulationDocument(
-      id = UUID.randomUUID(),
-      processed = 0,
-      results = listOf(),
-      status = BulkSimulationStatus.PROCESSING,
-      total = 0
-    )
+    val document =
+      BulkSimulationDocument(
+        id = UUID.randomUUID(),
+        processed = 0,
+        results = listOf(),
+        status = BulkSimulationStatus.PROCESSING,
+        total = 0,
+      )
 
     every { mongoRepository.save(document) } returns document
 
@@ -42,13 +42,14 @@ internal class BulkSimulationPersistenceAdapterTest {
   @Test
   fun `should find document by id using repository`() {
     val bulkId = UUID.randomUUID()
-    val document = BulkSimulationDocument(
-      id = bulkId,
-      processed = 0,
-      results = listOf(),
-      status = BulkSimulationStatus.PROCESSING,
-      total = 0
-    )
+    val document =
+      BulkSimulationDocument(
+        id = bulkId,
+        processed = 0,
+        results = listOf(),
+        status = BulkSimulationStatus.PROCESSING,
+        total = 0,
+      )
 
     every { mongoRepository.findById(bulkId) } returns Optional.of(document)
 

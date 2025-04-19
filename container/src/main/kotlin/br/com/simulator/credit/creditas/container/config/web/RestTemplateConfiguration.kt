@@ -1,4 +1,4 @@
-package br.com.simulator.credit.creditas.container.config
+package br.com.simulator.credit.creditas.container.config.web
 
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean

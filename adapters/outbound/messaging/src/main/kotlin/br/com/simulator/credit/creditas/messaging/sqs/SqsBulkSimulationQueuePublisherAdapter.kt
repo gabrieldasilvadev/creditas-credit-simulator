@@ -19,7 +19,6 @@ class SqsBulkSimulationQueuePublisherAdapter(
   private val logger = LoggerFactory.getLogger(SqsBulkSimulationQueuePublisherAdapter::class.java)
 
   fun send(message: BulkSimulationMessage) {
-
     val messageBody = objectMapper.writeValueAsString(message)
 
     val request =

@@ -13,7 +13,6 @@ import software.amazon.awssdk.services.sns.SnsClient
 import software.amazon.awssdk.services.sns.model.PublishRequest
 
 internal class SnsEventPublisherTest {
-
   private val snsClient = mockk<SnsClient>(relaxed = true)
   private val objectMapper = mockk<ObjectMapper>()
 
@@ -21,7 +20,7 @@ internal class SnsEventPublisherTest {
 
   data class DummyEvent(
     val id: String,
-    val type: String
+    val type: String,
   ) : DomainEvent {
     override val aggregateId = id
     override val occurredOn = System.currentTimeMillis()
@@ -54,7 +53,6 @@ internal class SnsEventPublisherTest {
     assert(capturedRequest.message().contains("123"))
     assert(capturedRequest.topicArn().endsWith("simulation-completed-topic"))
   }
-
 
   @Test
   fun `should call fallback when exception is thrown`() {
