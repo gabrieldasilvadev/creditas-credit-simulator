@@ -22,7 +22,7 @@ class GlobalExceptionHandler {
             status = HttpStatus.BAD_REQUEST.value(),
             error = "Validation failed",
             message = "There are validation errors in the request",
-            path = ex.parameter?.method?.name ?: "unknown",
+            path = ex.parameter.method?.name ?: "unknown",
             fieldErrors = errors
         )
 
