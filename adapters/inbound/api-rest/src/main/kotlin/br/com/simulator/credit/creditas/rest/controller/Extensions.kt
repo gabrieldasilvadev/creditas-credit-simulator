@@ -81,44 +81,46 @@ fun LoanSimulationRequestDto.toCommandDto(interestRatePolicy: InterestRatePolicy
   )
 }
 
-fun BulkSimulationDocument.toResponse() = BulkSimulationStatusResponseDto(
-  bulkId = this.id,
-  status = BulkSimulationStatusResponseDto.Status.forValue(this.status.name),
-  processed = this.processed,
-  total = this.total,
-  results = this.results.map { it.toResponseDto() },
-)
+fun BulkSimulationDocument.toResponse() =
+  BulkSimulationStatusResponseDto(
+    bulkId = this.id,
+    status = BulkSimulationStatusResponseDto.Status.forValue(this.status.name),
+    processed = this.processed,
+    total = this.total,
+    results = this.results.map { it.toResponseDto() },
+  )
 
-fun BulkSimulationResponseDto.toResponseDto() = LoanSimulationResponseDto(
-  source =
-    LoanSimulationResponseSourceDto(
-      MoneyDto(
-        amount = this.source.amount.amount.toString(),
-        currency = this.source.amount.currency.toString(),
+fun BulkSimulationResponseDto.toResponseDto() =
+  LoanSimulationResponseDto(
+    source =
+      LoanSimulationResponseSourceDto(
+        MoneyDto(
+          amount = this.source.amount.amount.toString(),
+          currency = this.source.amount.currency.toString(),
+        ),
       ),
-    ),
-  target =
-    LoanSimulationResponseTargetDto(
-      convertedAmount =
-        MoneyDto(
-          amount = this.target.convertedAmount.amount.toString(),
-          currency = this.target.convertedAmount.currency.toString(),
-        ),
-      totalPayment =
-        MoneyDto(
-          amount = this.target.totalPayment.amount.toString(),
-          currency = this.target.totalPayment.currency.toString(),
-        ),
-      monthlyInstallment =
-        MoneyDto(
-          amount = this.target.monthlyInstallment.amount.toString(),
-          currency = this.target.monthlyInstallment.currency.toString(),
-        ),
-      totalInterest =
-        MoneyDto(
-          amount = this.target.totalInterest.amount.toString(),
-          currency = this.target.totalInterest.currency.toString(),
-        ),
-      annualInterestRate = this.target.annualInterestRate.amount.toString(),
-    ),
-)
+    target =
+      LoanSimulationResponseTargetDto(
+        convertedAmount =
+          MoneyDto(
+            amount = this.target.convertedAmount.amount.toString(),
+            currency = this.target.convertedAmount.currency.toString(),
+          ),
+        totalPayment =
+          MoneyDto(
+            amount = this.target.totalPayment.amount.toString(),
+            currency = this.target.totalPayment.currency.toString(),
+          ),
+        monthlyInstallment =
+          MoneyDto(
+            amount = this.target.monthlyInstallment.amount.toString(),
+            currency = this.target.monthlyInstallment.currency.toString(),
+          ),
+        totalInterest =
+          MoneyDto(
+            amount = this.target.totalInterest.amount.toString(),
+            currency = this.target.totalInterest.currency.toString(),
+          ),
+        annualInterestRate = this.target.annualInterestRate.amount.toString(),
+      ),
+  )

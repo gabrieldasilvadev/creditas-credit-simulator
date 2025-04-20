@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 class MongoSimulationPersistenceAdapter(
   private val simulationMongoRepository: SimulationMongoRepository,
 ) : SimulationPersistencePort {
-
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun save(simulation: SimulateLoanAggregate) {

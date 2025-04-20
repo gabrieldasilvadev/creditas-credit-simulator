@@ -137,3 +137,7 @@ management:
   endpoint:
     prometheus:
       access: unrestricted
+
+mongock:
+  migration-scan-package:
+    - br.com.simulator.credit.creditas.persistence.migrations

@@ -13,6 +13,8 @@ repositories {
 
 dependencies {
   implementation(project(":infrastructure"))
+  implementation("io.mongock:mongock-springboot:5.5.1")
+  implementation("io.mongock:mongodb-springdata-v4-driver:5.5.1")
   implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 }
 

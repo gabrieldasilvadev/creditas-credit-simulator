@@ -12,10 +12,10 @@ import br.com.simulator.credit.openapi.web.dto.BulkSimulationStatusResponseDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationRequestDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationResponseDto
 import com.trendyol.kediatr.Mediator
-import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @Monitorable("LoanSimulationController")
@@ -24,7 +24,6 @@ class LoanSimulationController(
   private val policyConfiguration: PolicyConfiguration,
   private val bulkSimulationRepository: BulkSimulationPersistenceAdapter,
 ) : CreditSimulationApi {
-
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override suspend fun simulateLoan(

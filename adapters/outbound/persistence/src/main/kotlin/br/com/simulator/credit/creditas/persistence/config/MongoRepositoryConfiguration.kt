@@ -10,7 +10,7 @@ import java.util.UUID
 @Configuration
 @EnableMongoRepositories(basePackages = ["br.com.simulator.credit.creditas.persistence.repository"])
 @EnableMongoAuditing
-class MongoRepositoryConfig {
+class MongoRepositoryConfiguration {
   @Bean
   fun auditorProvider(): AuditorAware<UUID> {
     return AuditorAwareImpl()

@@ -6,7 +6,6 @@ import br.com.simulator.credit.creditas.notification.email.EmailContent
 import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationCompletedEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
-import io.awspring.cloud.sqs.annotation.SqsListenerAcknowledgementMode.ON_SUCCESS
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.MessageHeaders
 import org.springframework.messaging.handler.annotation.Headers
