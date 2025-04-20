@@ -65,8 +65,16 @@ paths:
                 $ref: '#/components/schemas/BulkSimulationInitResponse'
         '400':
           description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Erro interno no servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
       tags:
         - credit-simulation
 
@@ -93,6 +101,16 @@ paths:
                 $ref: '#/components/schemas/BulkSimulationStatusResponse'
         '404':
           description: ID de simulação em lote não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno no servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
       tags:
         - credit-simulation
 
@@ -262,15 +280,38 @@ components:
       type: object
       description: Estrutura padrão para mensagens de erro
       properties:
-        type:
+        timestamp:
           type: string
-          description: 'Tipo do erro (ex: VALIDATION_ERROR, INTERNAL_ERROR)'
+          format: date-time
+          description: Data e hora em que o erro ocorreu
+          example: '2025-04-20T18:30:00'
+        status:
+          type: integer
+          description: Código HTTP do erro
+          example: 400
+        error:
+          type: string
+          description: Descrição resumida do erro
+          example: Validation failed
         message:
           type: string
-          description: Mensagem explicativa do erro
-        details:
+          description: Mensagem explicativa sobre o erro ocorrido
+          example: There are validation errors in the request
+        path:
+          type: string
+          description: Caminho do endpoint onde o erro ocorreu
+          example: /simulations
+        fieldErrors:
           type: object
-          description: Campo opcional com informações detalhadas do erro
+          additionalProperties:
+            type: string
+          description: Mapeamento de campos inválidos e mensagens associadas
+          example:
+            customer_info.birth_date: must not be null
+            loan_amount.amount: must be greater than 0
       required:
-        - type
+        - timestamp
+        - status
+        - error
         - message
+        - path
