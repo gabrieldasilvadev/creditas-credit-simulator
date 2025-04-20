@@ -14,9 +14,9 @@ services:
       - 'SERVICES=sns,sqs'
       - 'DEBUG=${DEBUG-}'
     volumes:
-      - ./infra/localstack/setup-all.sh:/etc/localstack/init/ready.d/setup-all.sh:ro
+      - ./infra/localstack/setup.sh:/etc/localstack/init/ready.d/setup.sh:ro
       - ./infra/localstack/config:/etc/localstack/init/ready.d/config:ro
-      - ./infra/localstack/utils:/etc/localstack/init/ready.d/utils:ro
+      - ./infra/localstack/utils:/etc/localstack/init/ready.d/utils
     networks:
       docker-localstack-network:
         aliases:

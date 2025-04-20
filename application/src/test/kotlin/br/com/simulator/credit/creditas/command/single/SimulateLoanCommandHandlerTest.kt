@@ -24,11 +24,11 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
-import java.math.BigDecimal
-import java.time.LocalDate
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
 
 internal class SimulateLoanCommandHandlerTest {
   private val publisher = mockk<DomainEventPublisher>(relaxed = true)

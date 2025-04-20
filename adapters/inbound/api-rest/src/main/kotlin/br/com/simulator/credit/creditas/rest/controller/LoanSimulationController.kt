@@ -13,7 +13,7 @@ import br.com.simulator.credit.openapi.web.dto.LoanSimulationRequestDto
 import br.com.simulator.credit.openapi.web.dto.LoanSimulationResponseDto
 import com.trendyol.kediatr.Mediator
 import java.util.UUID
-import org.instancio.Instancio
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -24,40 +24,52 @@ class LoanSimulationController(
   private val policyConfiguration: PolicyConfiguration,
   private val bulkSimulationRepository: BulkSimulationPersistenceAdapter,
 ) : CreditSimulationApi {
+
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
   override suspend fun simulateLoan(
     loanSimulationRequestDto: LoanSimulationRequestDto,
   ): ResponseEntity<LoanSimulationResponseDto> {
+    logger.info("Received simulation request: $loanSimulationRequestDto")
     val policyType = loanSimulationRequestDto.policyType?.value ?: PolicyType.FIXED.value
     val interestRatePolicy = policyConfiguration.resolve(PolicyType.entryOf(policyType))
     val simulationHttpResponse = mediator.send(loanSimulationRequestDto.toCommand(interestRatePolicy))
-    return ResponseEntity.ok(simulationHttpResponse.toResponseDto())
+    return ResponseEntity.ok(simulationHttpResponse.toResponseDto()).also {
+      logger.info("Simulation response: ${it.body}")
+    }
   }
 
   override suspend fun startBulkSimulation(
-    bulkLoanSimulationRequestDto: BulkLoanSimulationRequestDto
+    bulkLoanSimulationRequestDto: BulkLoanSimulationRequestDto,
   ): ResponseEntity<BulkSimulationInitResponseDto> {
+    logger.info("Received bulk simulation request: $bulkLoanSimulationRequestDto")
     val bulkId = UUID.randomUUID()
-
-    val simulations = bulkLoanSimulationRequestDto.simulations.map {
-      val policyType = PolicyType.entryOf(it.policyType?.value ?: PolicyType.FIXED.value)
-      val interestRatePolicy = policyConfiguration.resolve(policyType)
-      it.toCommandDto(interestRatePolicy)
-    }
+    val simulations =
+      bulkLoanSimulationRequestDto.simulations.map {
+        val policyType = PolicyType.entryOf(it.policyType?.value ?: PolicyType.FIXED.value)
+        val interestRatePolicy = policyConfiguration.resolve(policyType)
+        it.toCommandDto(interestRatePolicy)
+      }
 
     mediator.send(StartBulkSimulationCommand(bulkId = bulkId, simulations = simulations))
 
     return ResponseEntity.accepted().body(
       BulkSimulationInitResponseDto(
         bulkId = bulkId,
-        status = BulkSimulationInitResponseDto.Status.PROCESSING
-      )
-    )
+        status = BulkSimulationInitResponseDto.Status.PROCESSING,
+      ),
+    ).also {
+      logger.info("Bulk simulation response: ${it.body}")
+    }
   }
 
   override suspend fun getBulkSimulationStatus(bulkId: UUID): ResponseEntity<BulkSimulationStatusResponseDto> {
+    logger.info("Getting bulk simulation status for ID: $bulkId")
     val bulk =
       bulkSimulationRepository.findById(bulkId).orElseThrow()
 
-    return ResponseEntity.ok(Instancio.create(BulkSimulationStatusResponseDto::class.java))
+    return ResponseEntity.ok(bulk.toResponse()).also {
+      logger.info("Bulk simulation status response: ${it.body}")
+    }
   }
 }

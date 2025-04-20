@@ -28,7 +28,7 @@ class EmailNotificationWorker(
     maxAttempts = 4,
     backoff = Backoff(delay = 2000, multiplier = 2.0),
   )
-  @SqsListener(value = ["\${cloud.aws.sqs.queues.emailNotificationQueue}"], acknowledgementMode = ON_SUCCESS)
+  @SqsListener("email-notification-queue")
   fun receive(
     @Payload envelope: EmailEnvelope,
     @Headers messageHeaders: MessageHeaders,

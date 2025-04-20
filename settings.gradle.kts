@@ -12,6 +12,7 @@ include(
   ":core:simulation-domain",
   ":core:common-domain",
   ":adapters:inbound:api-rest",
+  ":adapters:inbound:messaging",
   ":adapters:outbound:persistence",
   ":adapters:outbound:notification",
   ":adapters:outbound:messaging",

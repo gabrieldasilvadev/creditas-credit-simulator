@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: localstack-setup-job
+spec:
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      containers:
+        - name: infra-setup
+          image: localstack-setup:latest
+          imagePullPolicy: Never
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: localstack
+            - name: AWS_SECRET_ACCESS_KEY
+              value: localstack
+            - name: AWS_REGION
+              value: us-east-1
+          command: ["/bin/sh", "-c"]
+          args: ["/app/setup.sh"]
+      restartPolicy: Never
+  backoffLimit: 1

@@ -2,10 +2,9 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "Allow-SNS-SendMessage",
       "Effect": "Allow",
       "Principal": "*",
-      "Action": "SQS:SendMessage",
+      "Action": "sqs:SendMessage",
       "Resource": "REPLACE_WITH_QUEUE_ARN",
       "Condition": {
         "ArnEquals": {

@@ -22,6 +22,7 @@ spec:
       labels:
         app: localstack
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
         - name: localstack
           image: localstack/localstack:latest
@@ -52,6 +53,7 @@ metadata:
 spec:
   selector:
     app: localstack
+  type: ClusterIP
   ports:
     - protocol: TCP
       port: 4566

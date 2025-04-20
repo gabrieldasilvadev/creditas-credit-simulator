@@ -1,17 +1,24 @@
+#!/bin/bash
+set -e
+
+queue_arn=$1
+topic_arn=$2
+
+cat <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "Allow-SNS-SendMessage",
       "Effect": "Allow",
       "Principal": "*",
-      "Action": "SQS:SendMessage",
-      "Resource": "REPLACE_WITH_QUEUE_ARN",
+      "Action": "sqs:SendMessage",
+      "Resource": "$queue_arn",
       "Condition": {
         "ArnEquals": {
-          "aws:SourceArn": "REPLACE_WITH_TOPIC_ARN"
+          "aws:SourceArn": "$topic_arn"
         }
       }
     }
   ]
 }
+EOF

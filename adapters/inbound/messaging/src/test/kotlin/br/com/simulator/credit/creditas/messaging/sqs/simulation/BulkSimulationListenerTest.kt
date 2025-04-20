@@ -36,12 +36,13 @@ internal class BulkSimulationListenerTest {
 
   @BeforeEach
   fun setup() {
-    listener = BulkSimulationListener(
-      repository,
-      mediator,
-      policyConfiguration,
-      bulkSimulationProperties
-    )
+    listener =
+      BulkSimulationListener(
+        repository,
+        mediator,
+        policyConfiguration,
+        bulkSimulationProperties,
+      )
   }
 
   @Test
