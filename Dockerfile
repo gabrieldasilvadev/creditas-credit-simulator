@@ -1,15 +1,17 @@
-# Etapa de build
-FROM gradle:8.7.0-jdk21 AS builder
+# syntax=docker/dockerfile:1
+
+FROM gradle:8.5-jdk21
+
 WORKDIR /app
 
+# Copia tudo do projeto para dentro da imagem
 COPY . .
-RUN gradle :container:bootJar --no-daemon -x test
 
-# Etapa de runtime
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app
+# Compila o projeto gerando o bootJar (com nome fixo opcional)
+RUN ./gradlew :container:bootJar -x test --no-daemon
 
-COPY --from=builder /app/container/build/libs/app.jar app.jar
-
+# Expõe a porta da aplicação
 EXPOSE 7000
-CMD ["java", "-jar", "app.jar"]
+
+# Roda diretamente o JAR gerado
+CMD ["java", "-jar", "container/build/libs/app.jar"]

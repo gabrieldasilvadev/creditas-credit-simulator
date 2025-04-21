@@ -3,8 +3,8 @@ import { check, sleep } from 'k6';
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
 export let options = {
-  vus: 100,
-  iterations: 1000000,
+  vus: parseInt(__ENV.VUS || '100', 10),
+  iterations: parseInt(__ENV.ITERATIONS || '1000000', 10),
 };
 
 function randomBirthDate() {
@@ -19,7 +19,7 @@ function randomEmail() {
 }
 
 export default function () {
-  const url = 'http://localhost:7000/simulations';
+  const url = __ENV.BASE_URL || 'http://localhost:7000/simulations';
 
   const payload = JSON.stringify({
     loan_amount: {

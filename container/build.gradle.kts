@@ -32,3 +32,8 @@ tasks.test {
 kotlin {
   jvmToolchain(21)
 }
+
+tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
+  archiveFileName.set("app.jar")
+}
+

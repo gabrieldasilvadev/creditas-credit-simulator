@@ -181,3 +181,4 @@ tasks.bootJar {
 tasks.withType<org.springframework.boot.gradle.tasks.run.BootRun> {
   mainClass.set("br.com.simulator.credit.creditas.container.ApplicationKt")
 }
+

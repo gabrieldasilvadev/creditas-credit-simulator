@@ -1,23 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: localstack-init-scripts
+data:
+  setup.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    AWS_ENDPOINT="http://localstack:4566"
+    AWS="aws --endpoint-url $AWS_ENDPOINT --region us-east-1"
+
+    echo "🚀 Iniciando setup no LocalStack..."
+
+    # Criação dos tópicos SNS
+    for topic in simulation-completed-topic credit-simulation-topic; do
+      echo "📣 Criando tópico SNS: $topic"
+      $AWS sns create-topic --name "$topic"
+    done
+
+    # Criação das filas SQS
+    for queue in bulk-simulation-queue email-notification-queue credit-simulation-queue; do
+      echo "📦 Criando fila SQS: $queue"
+      $AWS sqs create-queue --queue-name "$queue"
+    done
+
+    # Função para aplicar a política
+    render_policy() {
+      local topic_arn=$1
+      local queue_name=$2
+
+      queue_url=$($AWS sqs get-queue-url --queue-name "$queue_name" --output text)
+      queue_arn=$($AWS sqs get-queue-attributes --queue-url "$queue_url" --attribute-name QueueArn --query "Attributes.QueueArn" --output text)
+
+      echo "🛡️ Aplicando policy à fila $queue_name"
+      echo "$POLICY_JSON" | sed "s|REPLACE_WITH_QUEUE_ARN|$queue_arn|g" | sed "s|REPLACE_WITH_TOPIC_ARN|$topic_arn|g" > /tmp/policy_rendered.json
+      $AWS sqs set-queue-attributes --queue-url "$queue_url" --attributes Policy="file:///tmp/policy_rendered.json"
+    }
+
+    # SNS → SQS: simulation-completed-topic → bulk-simulation-queue
+    topic_arn=$($AWS sns list-topics --query "Topics[?contains(TopicArn, 'simulation-completed-topic')].TopicArn" --output text)
+    render_policy "$topic_arn" "bulk-simulation-queue"
+    $AWS sns subscribe --topic-arn "$topic_arn" --protocol sqs --notification-endpoint arn:aws:sqs:us-east-1:000000000000:bulk-simulation-queue
+
+    # SNS → SQS: credit-simulation-topic → credit-simulation-queue
+    topic_arn=$($AWS sns list-topics --query "Topics[?contains(TopicArn, 'credit-simulation-topic')].TopicArn" --output text)
+    render_policy "$topic_arn" "credit-simulation-queue"
+    $AWS sns subscribe --topic-arn "$topic_arn" --protocol sqs --notification-endpoint arn:aws:sqs:us-east-1:000000000000:credit-simulation-queue
+
+  policy.json: |
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "Allow-SNS-SendMessage",
+          "Effect": "Allow",
+          "Principal": "*",
+          "Action": "SQS:SendMessage",
+          "Resource": "REPLACE_WITH_QUEUE_ARN",
+          "Condition": {
+            "ArnEquals": {
+              "aws:SourceArn": "REPLACE_WITH_TOPIC_ARN"
+            }
+          }
+        }
+      ]
+    }
+
+---
+
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: localstack-setup-job
+  name: localstack-setup
 spec:
-  activeDeadlineSeconds: 120
   template:
     spec:
+      restartPolicy: Never
       containers:
-        - name: infra-setup
-          image: localstack-setup:latest
-          imagePullPolicy: Never
+        - name: aws-cli
+          image: amazon/aws-cli:2.15.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - export POLICY_JSON="$(cat /scripts/policy.json)"; /scripts/setup.sh
           env:
             - name: AWS_ACCESS_KEY_ID
               value: localstack
             - name: AWS_SECRET_ACCESS_KEY
               value: localstack
-            - name: AWS_REGION
+            - name: AWS_DEFAULT_REGION
               value: us-east-1
-          command: ["/bin/sh", "-c"]
-          args: ["/app/setup.sh"]
-      restartPolicy: Never
-  backoffLimit: 1
+          volumeMounts:
+            - name: script-volume
+              mountPath: /scripts
+      volumes:
+        - name: script-volume
+          configMap:
+            name: localstack-init-scripts
+            defaultMode: 0775

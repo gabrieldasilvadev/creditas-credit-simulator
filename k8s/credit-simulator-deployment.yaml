@@ -61,7 +61,6 @@ spec:
     app: credit-simulator
   ports:
     - protocol: TCP
-      port: 80
+      port: 7000
       targetPort: 7000
-      nodePort: 30007
-  type: ClusterIP # NodePort
+  type: ClusterIP
