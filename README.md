@@ -263,4 +263,5 @@ curl http://localhost:7000/simulations/bulk/{bulk_id}
 - Dashboard Grafana com métricas detalhadas (ThreadPoolTaskExecutor, latência)
 - Cache distribuído (Redis)
 - Testes de carga segmentados com batches assíncronos no bulk
+- Load balancing com Nginx
 
