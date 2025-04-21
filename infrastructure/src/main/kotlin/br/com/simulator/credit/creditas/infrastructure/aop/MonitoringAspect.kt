@@ -2,8 +2,8 @@ package br.com.simulator.credit.creditas.infrastructure.aop
 
 import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Tags
+import java.util.concurrent.TimeUnit
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -15,39 +15,44 @@ import org.springframework.stereotype.Component
 class MonitoringAspect(private val meterRegistry: MeterRegistry) {
   private val logger = LoggerFactory.getLogger(MonitoringAspect::class.java)
 
+  private inline fun safe(action: () -> Unit) {
+    try {
+      action()
+    } catch (t: Throwable) {
+      logger.debug("Falha ao registrar métrica: ${t.message}")
+    }
+  }
+
   @Around("@within(monitorable)")
-  fun monitor(
-    joinPoint: ProceedingJoinPoint,
-    monitorable: Monitorable,
-  ): Any? {
+  fun monitor(joinPoint: ProceedingJoinPoint, monitorable: Monitorable): Any? {
     val clazz = joinPoint.signature.declaringType.simpleName
     val method = joinPoint.signature.name
     val monitorName = monitorable.value.ifBlank { clazz }
+    val tags = Tags.of("class", monitorName, "method", method)
 
-    val tags =
-      mutableListOf(
-        Tag.of("class", monitorName),
-        Tag.of("method", method),
-      )
+    val start = System.nanoTime()
+    var thrown: Throwable? = null
 
-    val counter = meterRegistry.counter("method.calls", tags)
-    val timer = meterRegistry.timer("method.execution", tags)
+    try {
+      return joinPoint.proceed()
+    } catch (t: Throwable) {
+      thrown = t
+      throw t
+    } finally {
+      val elapsed = System.nanoTime() - start
 
-    counter.increment()
-
-    return try {
-      timer.recordCallable {
-        joinPoint.proceed()
+      safe { meterRegistry.counter("method.calls", tags).increment() }
+      safe {
+        meterRegistry.timer("method.execution", tags)
+          .record(elapsed, TimeUnit.NANOSECONDS)
       }
-    } catch (e: Exception) {
-      meterRegistry.counter(
-        "method.errors",
-        Tags.of(tags).and("exception", e.javaClass.simpleName),
-      ).increment()
 
-      logger.error("Error during execution of $monitorName.$method", e)
-
-      joinPoint.proceed()
+      if (thrown == null) {
+        safe { meterRegistry.counter("method.success", tags).increment() }
+      } else {
+        val errorTags = tags.and("exception", thrown.javaClass.simpleName)
+        safe { meterRegistry.counter("method.errors", errorTags).increment() }
+      }
     }
   }
 }

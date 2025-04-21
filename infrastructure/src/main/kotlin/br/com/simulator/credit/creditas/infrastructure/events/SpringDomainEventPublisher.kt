@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
 @Component
-@Monitorable("SpringDomainEventPublisher")
+@Monitorable
 class SpringDomainEventPublisher(private val applicationEventPublisher: ApplicationEventPublisher) :
   DomainEventPublisher {
   private val logger = LoggerFactory.getLogger(SpringDomainEventPublisher::class.java)

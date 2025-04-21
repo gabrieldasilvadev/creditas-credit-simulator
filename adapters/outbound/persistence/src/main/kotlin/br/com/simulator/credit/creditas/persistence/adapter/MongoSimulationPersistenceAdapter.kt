@@ -17,7 +17,6 @@ import java.util.Optional
 import java.util.UUID
 
 @Component
-@Monitorable("MongoSimulationPersistenceAdapter")
 class MongoSimulationPersistenceAdapter(
   private val simulationMongoRepository: SimulationMongoRepository,
   private val mongoTemplate: MongoTemplate,

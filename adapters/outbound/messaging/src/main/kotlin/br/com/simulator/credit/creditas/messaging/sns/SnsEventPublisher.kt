@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.sns.SnsClient
 import software.amazon.awssdk.services.sns.model.PublishRequest
 
 @Component
-@Monitorable("SnsEventPublisher")
+@Monitorable
 class SnsEventPublisher(
   private val snsClient: SnsClient,
   private val objectMapper: ObjectMapper,

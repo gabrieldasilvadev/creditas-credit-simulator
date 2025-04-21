@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-@Monitorable("SimulateLoanCommandHandler")
+@Monitorable
 class SimulateLoanCommandHandler(
   private val domainEventPublisher: DomainEventPublisher,
   private val loanAmountFactory: LoanAmountFactory,
@@ -49,7 +49,6 @@ class SimulateLoanCommandHandler(
       runCatching { simulationPersistencePort.save(aggregate) }
         .onSuccess { domainEventPublisher.publishAll(simulation.getAndClearEvents()) }
         .onFailure { logger.error("Error saving simulation: ${it.message} | cause: ${it.cause}") }
-        .getOrThrow()
 
       logger.info("Loan simulation saved successfully: $aggregate")
 

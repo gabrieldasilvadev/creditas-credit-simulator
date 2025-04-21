@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-@Monitorable("StartBulkSimulationCommandHandler")
+@Monitorable
 class StartBulkSimulationCommandHandler(
   private val repository: BulkSimulationPersistenceAdapter,
   private val publisher: SqsBulkSimulationQueuePublisherAdapter,

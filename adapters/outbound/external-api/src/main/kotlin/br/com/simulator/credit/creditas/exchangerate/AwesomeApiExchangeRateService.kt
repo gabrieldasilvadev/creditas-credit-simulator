@@ -12,7 +12,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component
-@Monitorable("AwesomeApiExchangeRateService")
+@Monitorable
 class AwesomeApiExchangeRateService(
   private val awesomeApiClient: AwesomeApiClient,
 ) : ExchangeRateService {

@@ -9,7 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Component
 
 @Component
-@Monitorable("SimulationResultEmailService")
+@Monitorable
 class SimulationResultEmailService(
   private val emailSender: JavaMailSender,
   @Value("\${feature.toggle.send-email}")

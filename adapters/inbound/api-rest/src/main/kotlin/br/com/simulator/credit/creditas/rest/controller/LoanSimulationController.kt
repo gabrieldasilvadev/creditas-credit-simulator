@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@Monitorable("LoanSimulationController")
+@Monitorable
 class LoanSimulationController(
   private val mediator: Mediator,
   private val policyConfiguration: PolicyConfiguration,
