@@ -3,6 +3,7 @@ package br.com.simulator.credit.creditas.messaging.sqs.simulation
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto.Companion.toLoanSimulationCommandDto
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto.Companion.toSimulateLoanCommand
+import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.persistence.adapter.BulkSimulationPersistenceAdapter
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationResponseDto
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationStatus
@@ -23,6 +24,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
 @Component
+@Monitorable
 class BulkSimulationListener(
   private val repository: BulkSimulationPersistenceAdapter,
   private val mediator: Mediator,
