@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.MongoTemplate
 @Configuration
 @EnableMongock
 class MongockConfiguration {
-
   @Bean
   fun connectionDriver(mongoTemplate: MongoTemplate): ConnectionDriver {
     return SpringDataMongoV4Driver.withDefaultLock(mongoTemplate)
@@ -22,7 +21,7 @@ class MongockConfiguration {
   @Bean
   fun mongockInitializingBeanRunner(
     connectionDriver: ConnectionDriver,
-    applicationContext: ApplicationContext
+    applicationContext: ApplicationContext,
   ): MongockInitializingBeanRunner {
     return MongockSpringboot.builder()
       .setDriver(connectionDriver)

@@ -3,12 +3,12 @@ package br.com.simulator.credit.creditas.infrastructure.aop
 import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
-import java.util.concurrent.TimeUnit
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Aspect
 @Component
@@ -24,7 +24,10 @@ class MonitoringAspect(private val meterRegistry: MeterRegistry) {
   }
 
   @Around("@within(monitorable)")
-  fun monitor(joinPoint: ProceedingJoinPoint, monitorable: Monitorable): Any? {
+  fun monitor(
+    joinPoint: ProceedingJoinPoint,
+    monitorable: Monitorable,
+  ): Any? {
     val clazz = joinPoint.signature.declaringType.simpleName
     val method = joinPoint.signature.name
     val monitorName = monitorable.value.ifBlank { clazz }

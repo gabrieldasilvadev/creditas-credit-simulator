@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component
 @Aspect
 @Component
 class CorrelationLoggingAspect {
-
   @Before("execution(* br.com.simulator.credit.creditas..*(..))")
   fun logCorrelationId() {
     val correlationId = MDC.get("correlationId") ?: "undefined"

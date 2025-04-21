@@ -1,6 +1,7 @@
 package br.com.simulator.credit.creditas.rest.exception
 
 import br.com.simulator.credit.openapi.web.dto.ErrorResponseDto
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.BindException
@@ -9,11 +10,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import org.slf4j.LoggerFactory
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   @ExceptionHandler(MethodArgumentNotValidException::class)

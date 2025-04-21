@@ -6,5 +6,5 @@ import java.lang.annotation.Inherited
 @Retention(AnnotationRetention.RUNTIME)
 @Inherited
 annotation class Monitorable(
-  val value: String = ""
+  val value: String = "",
 )
