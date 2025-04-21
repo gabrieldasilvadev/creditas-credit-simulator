@@ -8,6 +8,7 @@ import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationDocu
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationStatus
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.CustomerInfo
 import br.com.simulator.credit.creditas.simulationdomain.policy.PolicyType
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -21,12 +22,13 @@ import java.util.UUID
 internal class StartBulkSimulationCommandHandlerTest {
   private val repository = mockk<BulkSimulationPersistenceAdapter>()
   private val publisher = mockk<SqsBulkSimulationQueuePublisherAdapter>(relaxed = true)
+  private val objectMapper = mockk<ObjectMapper>(relaxed = true)
 
   private lateinit var handler: StartBulkSimulationCommandHandler
 
   @BeforeEach
   fun setup() {
-    handler = StartBulkSimulationCommandHandler(repository, publisher)
+    handler = StartBulkSimulationCommandHandler(repository, publisher, objectMapper)
   }
 
   @Test
