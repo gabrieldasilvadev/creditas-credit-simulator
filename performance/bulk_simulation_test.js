@@ -26,7 +26,6 @@ function randomCurrency() {
 }
 
 function randomPolicy() {
-  // Corrigido para usar os valores exatos conforme esperado pela API
   const policies = ['fixed', 'age'];
   return policies[Math.floor(Math.random() * policies.length)];
 }
@@ -39,7 +38,6 @@ function generateSimulations(count) {
   const sims = [];
   for (let i = 0; i < count; i++) {
     const sourceCurrency = 'BRL';
-    // Garantindo que target_currency seja aleatório entre BRL e USD
     const targetCurrency = randomCurrency();
 
     sims.push({
