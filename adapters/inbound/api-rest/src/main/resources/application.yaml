@@ -2,3 +2,8 @@ springdoc:
   swagger-ui:
     url: ./contract/api-docs.yaml
     path: /swagger-ui.html
+
+spring:
+  web:
+    resources:
+      add-mappings: false

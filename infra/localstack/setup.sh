@@ -60,6 +60,7 @@ docker exec -i $CONTAINER_NAME awslocal sqs set-queue-attributes \
 docker exec -i $CONTAINER_NAME awslocal sns subscribe \
   --topic-arn "$SIMULATION_TOPIC_ARN" \
   --protocol sqs \
-  --notification-endpoint "$EMAIL_QUEUE_ARN"
+  --notification-endpoint "$EMAIL_QUEUE_ARN" \
+  --attributes RawMessageDelivery=true
 
 echo "✅ Subscrição concluída com sucesso!"

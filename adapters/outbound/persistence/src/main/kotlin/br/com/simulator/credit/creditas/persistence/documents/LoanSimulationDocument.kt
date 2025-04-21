@@ -25,6 +25,7 @@ data class LoanSimulationDocument(
   val totalPayment: BigDecimal,
   val totalInterest: BigDecimal,
   val monthlyRate: BigDecimal,
+  var locked: Boolean = false,
   @field:CreatedDate
   val createdAt: LocalDateTime? = null,
   val createdBy: UUID? = null,

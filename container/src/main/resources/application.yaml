@@ -13,9 +13,6 @@ server:
     max-http-form-post-size: 2MB
 
 spring:
-  web:
-    resources:
-      add-mappings: false
   main:
     allow-bean-definition-overriding: true
   data:

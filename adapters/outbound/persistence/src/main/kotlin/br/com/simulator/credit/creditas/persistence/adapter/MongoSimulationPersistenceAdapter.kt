@@ -5,6 +5,9 @@ import br.com.simulator.credit.creditas.persistence.documents.LoanSimulationDocu
 import br.com.simulator.credit.creditas.persistence.repository.SimulationMongoRepository
 import br.com.simulator.credit.creditas.simulationdomain.model.SimulateLoanAggregate
 import br.com.simulator.credit.creditas.simulationdomain.model.ports.SimulationPersistencePort
+import java.util.Date
+import java.util.Optional
+import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -12,9 +15,6 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Component
-import java.util.Date
-import java.util.Optional
-import java.util.UUID
 
 @Component
 @Monitorable
@@ -25,15 +25,24 @@ class MongoSimulationPersistenceAdapter(
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun save(simulation: SimulateLoanAggregate) {
-    logger.info("Saving simulation with distributed lock: $simulation")
+    val simulationId = simulation.id.value
+    val simulationDocument = LoanSimulationDocument.from(simulation)
 
-    withSimulationLock(simulation.id.value) { _ ->
-      val simulationDocument = LoanSimulationDocument.from(simulation)
-      simulationMongoRepository.save(simulationDocument).also {
-        logger.info("Simulation saved: $it")
-      }
-    } ?: run {
-      logger.warn("Lock not acquired for simulationId=${simulation.id}. Skipping save.")
+    if (!simulationMongoRepository.existsById(simulationId)) {
+      logger.info("Inserting new simulation document: $simulationDocument")
+      simulationMongoRepository.save(simulationDocument)
+        .also { logger.info("Initial simulation inserted: $it") }
+      return
+    }
+
+    logger.info("Updating simulation under distributed lock: id=$simulationId")
+    val result = withSimulationLock(simulationId) { _ ->
+      simulationMongoRepository.save(simulationDocument)
+        .also { logger.info("Simulation saved under lock: $it") }
+    }
+
+    if (result == null) {
+      logger.warn("Could not acquire lock for simulationId=$simulationId. Skipping save.")
     }
   }
 

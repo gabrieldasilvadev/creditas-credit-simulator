@@ -6,14 +6,17 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class EmailEnvelope
-  @JsonCreator
-  constructor(
-    @JsonProperty("Type")
-    val type: String,
-    @JsonProperty("MessageId")
-    val messageId: String,
-    @JsonProperty("Message")
-    val message: String,
-    @JsonProperty("Timestamp")
-    val timestamp: String,
-  )
+@JsonCreator
+constructor(
+  @JsonProperty("Type")
+  val type: String? = null,
+
+  @JsonProperty("MessageId")
+  val messageId: String? = null,
+
+  @JsonProperty("Message")
+  val message: String? = null,
+
+  @JsonProperty("Timestamp")
+  val timestamp: String? = null,
+)
