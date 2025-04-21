@@ -85,7 +85,7 @@ class GlobalExceptionHandler {
         timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC),
         status = HttpStatus.INTERNAL_SERVER_ERROR.name,
         type = "Internal server error",
-        message = "Please contact support team",
+        message = ex.stackTrace.contentToString() ?: "Internal server error",
         path = httpServletRequest.requestURI,
         details = null,
       )

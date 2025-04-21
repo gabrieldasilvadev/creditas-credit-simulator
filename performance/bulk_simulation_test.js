@@ -27,7 +27,8 @@ function randomCurrency() {
 }
 
 function randomPolicy() {
-  const policies = ['fixed', 'age_based'];
+  // Corrigido para usar os valores exatos conforme esperado pela API
+  const policies = ['fixed', 'age'];
   return policies[Math.floor(Math.random() * policies.length)];
 }
 
@@ -38,10 +39,14 @@ function randomEmail(index) {
 function generateSimulations(count) {
   const sims = [];
   for (let i = 0; i < count; i++) {
+    const sourceCurrency = 'BRL';
+    // Garantindo que target_currency seja aleatório entre BRL e USD
+    const targetCurrency = randomCurrency();
+
     sims.push({
       loan_amount: {
         amount: randomAmount(),
-        currency: randomCurrency(),
+        currency: sourceCurrency,
       },
       customer_info: {
         birth_date: randomBirthDate(),
@@ -49,8 +54,8 @@ function generateSimulations(count) {
       },
       months: Math.floor(Math.random() * 60) + 6,
       policy_type: randomPolicy(),
-      source_currency: 'BRL',
-      target_currency: 'USD',
+      source_currency: sourceCurrency,
+      target_currency: targetCurrency,
     });
   }
   return sims;
@@ -72,5 +77,8 @@ export default function () {
   });
 
   console.log(`Sent ${TOTAL_SIMULATIONS} simulations → status ${res.status}`);
+  if (res.status !== 200) {
+    console.error(`Error response: ${res.body}`);
+  }
   sleep(1);
 }

@@ -83,42 +83,52 @@ Principais características:
 ### 🛳️ Kubernetes com Minikube (opcional)
 
 1. Inicie o Minikube:
-   ``` bash
-   minikube start
-   ```
-2. Configure o Minikube:
-   ```bash
-   # Construa a imagem do LocalStack
-   kubectl apply -f k8s/localstack-deployment.yaml
-   kubectl rollout status deployment/localstack --timeout=120s
-   kubectl get pods -l app=localstack -w
+```bash
+    minikube start
+```
 
-   # Execute o job de configuração do LocalStack
-   kubectl apply -f k8s/localstack-setup-job.yaml
-   kubectl logs job/localstack-setup-job -f
+2. Construir o LocalStack:
+```bash
+    kubectl apply -f k8s/localstack-deployment.yaml
+    kubectl rollout status deployment/localstack --timeout=120s
+    kubectl get pods -l app=localstack -w
+```
 
-   # Execute o deployment do MongoDB
-   kubectl apply -f k8s/mongodb-deployment.yaml
-   kubectl rollout status deployment/mongodb --timeout=120s
+3. Execute o job de configuração do LocalStack:
+```bash
+    kubectl apply -f k8s/localstack-setup-job.yaml
+    kubectl logs job/localstack-setup-job -f
+```
 
-   # Construa a imagem do simulador de crédito
-   docker build -t credit-simulator:latest -f Dockerfile .
-   minikube image load credit-simulator:latest
+4. Construa a imagem do MongoDB:
+ ```bash
+    kubectl apply -f k8s/mongodb-deployment.yaml
+    kubectl rollout status deployment/mongodb --timeout=120s
+```
 
-   # Aplique o deployment do simulador de crédito
-   kubectl apply -f k8s/credit-simulator-deployment.yaml
-   kubectl rollout status deployment/credit-simulator --timeout=120s
-   kubectl get pods -l app=credit-simulator -w
-   ```
-3. Exponha os serviços:
-   ```bash
-   kubectl port-forward svc/credit-simulator 7000:7000
-   kubectl port-forward svc/mongodb 27017:27017
-   ```
-4. Verifique os pods:
-   ```bash
-   kubectl get pods
-   ```
+5. Construa a imagem do simulador de crédito
+```bash
+    docker build -t credit-simulator:latest -f Dockerfile .
+    minikube image load credit-simulator:latest
+```
+
+6. Aplique o deployment do simulador de crédito
+```bash
+    kubectl apply -f k8s/credit-simulator-deployment.yaml
+    kubectl rollout status deployment/credit-simulator --timeout=120s
+    kubectl get pods -l app=credit-simulator -w
+```
+
+7. Exponha os serviços:
+```bash
+    kubectl port-forward svc/credit-simulator 7000:7000
+    kubectl port-forward svc/mongodb 27017:27017
+```
+
+8. Verifique os pods:
+```bash
+    kubectl get pods
+```
 
 ---
 
@@ -157,23 +167,54 @@ Principais características:
 ### Exemplo: Simulação Única
 
 ```bash
-curl -X POST http://localhost:7000/simulations \
-  -H "Content-Type: application/json" \
-  -d '{
-    "loan_amount": {"amount":"10000.00","currency":"BRL"},
-    "customer_info": {"birth_date":"1990-04-15","email":"cliente@teste.com"},
-    "months": 12,
-    "source_currency": "BRL",
-    "target_currency": "USD"
-  }'
+    curl -X POST http://localhost:7000/simulations \
+      -H "Content-Type: application/json" \
+      -d '{
+        "loan_amount": {"amount":"10000.00","currency":"BRL"},
+        "customer_info": {"birth_date":"1990-04-15","email":"cliente@teste.com"},
+        "months": 12,
+        "source_currency": "BRL",
+        "target_currency": "USD"
+      }'
 ```
 
 ### Exemplo: Simulação em Lote
 
 ```bash
-curl -X POST http://localhost:7000/simulations/bulk \
-  -H "Content-Type: application/json" \
-  -d '{ "simulations": [ {...}, {...}, ... ] }'
+    curl -X POST http://localhost:7000/simulations/bulk \
+      -H "Content-Type: application/json" \
+      -d '{
+        "simulations": [
+          {
+            "loan_amount": {
+              "amount": "10000.00",
+              "currency": "BRL"
+            },
+            "customer_info": {
+              "birth_date": "1990-01-15",
+              "email": "cliente1@example.com"
+            },
+            "months": 12,
+            "policy_type": "fixed",
+            "source_currency": "BRL",
+            "target_currency": "USD"
+          },
+          {
+            "loan_amount": {
+              "amount": "5000.00",
+              "currency": "BRL"
+            },
+            "customer_info": {
+              "birth_date": "2002-05-20",
+              "email": "cliente2@example.com"
+            },
+            "months": 24,
+            "policy_type": "age",
+            "source_currency": "BRL",
+            "target_currency": "BRL"
+          }
+        ]
+      }'
 ```
 
 Resposta inicial:
@@ -200,8 +241,10 @@ curl http://localhost:7000/simulations/bulk/{bulk_id}
 - **Adapters**:
   - REST Controllers (Spring MVC)
   - Persistence: MongoDB (Spring Data)
-  - External Api: Feign Client + Caffeine
+  - External Api: Feign Client
+  - Cache: Caffeine
   - Mensageria (SQS/SNS) – abstração para high-volume (Bulk)
+  - Notificação (Email) – Envio de notificações via, por exemplo, Email
 - **Config**: Beans, Resilience4j (Circuit Breaker, Retry, Timeout), Micrometer
 
 ---

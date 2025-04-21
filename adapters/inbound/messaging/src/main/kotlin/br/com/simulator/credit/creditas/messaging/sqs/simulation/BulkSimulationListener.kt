@@ -41,7 +41,7 @@ class BulkSimulationListener(
 
   private suspend fun processMessage(message: BulkSimulationMessage) =
     coroutineScope {
-      logger.info("[BulkSimulationListener] Received message: $message")
+      logger.info("Processing bulk simulation message: $message")
       val processedCount = AtomicInteger(0)
       val total = message.simulations.size
 
