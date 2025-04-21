@@ -56,6 +56,7 @@ class LoanSimulationController(
       BulkSimulationInitResponseDto(
         bulkId = bulkId,
         status = BulkSimulationInitResponseDto.Status.PROCESSING,
+        queryUrl = "/simulations/bulk/$bulkId",
       ),
     ).also {
       logger.info("Bulk simulation response: ${it.body}")

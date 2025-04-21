@@ -1,6 +1,7 @@
 package br.com.simulator.credit.creditas.rest.exception
 
 import br.com.simulator.credit.openapi.web.dto.ErrorResponseDto
+import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -34,7 +35,7 @@ class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(BindException::class)
-  fun handleBindException(ex: BindException): ResponseEntity<ErrorResponseDto> {
+  fun handleBindException(ex: BindException, httpServletRequest: HttpServletRequest): ResponseEntity<ErrorResponseDto> {
     val errors = ex.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "Invalid value") }
 
     val errorResponse =
@@ -43,7 +44,7 @@ class GlobalExceptionHandler {
         status = HttpStatus.BAD_REQUEST.value(),
         error = "Binding failed",
         message = "There are binding errors in the request",
-        path = "unknown",
+        path = httpServletRequest.requestURI,
         fieldErrors = errors,
       )
 
@@ -52,14 +53,14 @@ class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(IllegalArgumentException::class)
-  fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ErrorResponseDto> {
+  fun handleIllegalArgument(ex: IllegalArgumentException, httpServletRequest: HttpServletRequest): ResponseEntity<ErrorResponseDto> {
     val errorResponse =
       ErrorResponseDto(
         timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC),
         status = HttpStatus.BAD_REQUEST.value(),
         error = "Invalid argument",
         message = ex.message ?: "Illegal argument",
-        path = "unknown",
+        path = httpServletRequest.requestURI,
       )
 
     logger.error("Illegal argument error: ${errorResponse.message}", ex)
@@ -67,17 +68,18 @@ class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(Exception::class)
-  fun handleGenericException(ex: Exception): ResponseEntity<ErrorResponseDto> {
+  fun handleGenericException(ex: Exception, httpServletRequest: HttpServletRequest): ResponseEntity<ErrorResponseDto> {
     val errorResponse =
       ErrorResponseDto(
         timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC),
         status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
         error = "Internal server error",
-        message = ex.message ?: "Unexpected error",
-        path = "unknown",
+        message = "Please contact support team",
+        path = httpServletRequest.requestURI,
       )
 
-    logger.error("Internal server error: ${errorResponse.message}", ex)
+    logger.error("Internal server error: ${errorResponse.message}")
+
     return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
   }
 }

@@ -61,7 +61,8 @@ create_queue_with_policy() {
   $AWS sns subscribe \
     --topic-arn "$topic_arn" \
     --protocol sqs \
-    --notification-endpoint "$queue_arn" || true
+    --notification-endpoint "$queue_arn" || true \
+    --attributes RawMessageDelivery=true
 }
 
 # ✅ Criando tópicos SNS

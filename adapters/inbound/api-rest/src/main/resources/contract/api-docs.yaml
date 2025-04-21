@@ -42,7 +42,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
         - credit-simulation
-
   /simulations/bulk:
     post:
       summary: Iniciar simulações em lote
@@ -65,20 +64,11 @@ paths:
                 $ref: '#/components/schemas/BulkSimulationInitResponse'
         '400':
           description: Requisição inválida
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Erro interno no servidor
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
       tags:
         - credit-simulation
-
-  /simulations/bulk/{bulkId}:
+  '/simulations/bulk/{bulkId}':
     get:
       summary: Consultar status de simulação em lote
       description: |
@@ -101,19 +91,8 @@ paths:
                 $ref: '#/components/schemas/BulkSimulationStatusResponse'
         '404':
           description: ID de simulação em lote não encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Erro interno no servidor
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
       tags:
         - credit-simulation
-
 components:
   schemas:
     LoanSimulationRequest:
@@ -148,7 +127,6 @@ components:
         - loan_amount
         - customer_info
         - months
-
     BulkLoanSimulationRequest:
       type: object
       description: Requisição para simulações de crédito em lote
@@ -160,7 +138,6 @@ components:
           description: Lista de simulações a serem processadas
       required:
         - simulations
-
     LoanSimulationResponse:
       type: object
       description: Resposta com os dados calculados da simulação
@@ -185,7 +162,6 @@ components:
               $ref: '#/components/schemas/Money'
             annual_interest_rate:
               $ref: '#/components/schemas/Rate'
-
     BulkSimulationInitResponse:
       type: object
       description: Resposta com o ID de controle da simulação em lote
@@ -202,10 +178,13 @@ components:
             - COMPLETED
           description: Status inicial do processamento
           example: PROCESSING
+        query_url:
+          type: string
+          description: Endpoint para consultar o status da simulação em lote
       required:
         - bulk_id
         - status
-
+        - query_url
     BulkSimulationStatusResponse:
       type: object
       description: Resposta com o status e resultados da simulação em lote
@@ -235,7 +214,6 @@ components:
         - status
         - processed
         - total
-
     CustomerInfoRequest:
       type: object
       description: Informações do cliente para simulação
@@ -253,7 +231,6 @@ components:
       required:
         - birth_date
         - email
-
     Money:
       type: object
       description: Representação de valor monetário
@@ -270,48 +247,23 @@ components:
       required:
         - amount
         - currency
-
     Rate:
       type: string
       pattern: '^(?!0\.00$)(?:[1-9]\d*(\.\d{2})?|0\.\d*[1-9]\d*)$'
       description: Taxa de juros percentual anual representada como string com 2 casas decimais
-
     ErrorResponse:
       type: object
       description: Estrutura padrão para mensagens de erro
       properties:
-        timestamp:
+        type:
           type: string
-          format: date-time
-          description: Data e hora em que o erro ocorreu
-          example: '2025-04-20T18:30:00'
-        status:
-          type: integer
-          description: Código HTTP do erro
-          example: 400
-        error:
-          type: string
-          description: Descrição resumida do erro
-          example: Validation failed
+          description: 'Tipo do erro (ex: VALIDATION_ERROR, INTERNAL_ERROR)'
         message:
           type: string
-          description: Mensagem explicativa sobre o erro ocorrido
-          example: There are validation errors in the request
-        path:
-          type: string
-          description: Caminho do endpoint onde o erro ocorreu
-          example: /simulations
-        fieldErrors:
+          description: Mensagem explicativa do erro
+        details:
           type: object
-          additionalProperties:
-            type: string
-          description: Mapeamento de campos inválidos e mensagens associadas
-          example:
-            customer_info.birth_date: must not be null
-            loan_amount.amount: must be greater than 0
+          description: Campo opcional com informações detalhadas do erro
       required:
-        - timestamp
-        - status
-        - error
+        - type
         - message
-        - path
