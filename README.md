@@ -170,9 +170,16 @@ Principais características:
     curl -X POST http://localhost:7000/simulations \
       -H "Content-Type: application/json" \
       -d '{
-        "loan_amount": {"amount":"10000.00","currency":"BRL"},
-        "customer_info": {"birth_date":"1990-04-15","email":"cliente@teste.com"},
+        "loan_amount": {
+          "amount": "1000.00",
+          "currency": "USD"
+        },
+        "customer_info": {
+          "birth_date": "2003-04-15",
+          "email": "user@example.com"
+        },
         "months": 12,
+        "policy_type": "age",
         "source_currency": "BRL",
         "target_currency": "USD"
       }'
