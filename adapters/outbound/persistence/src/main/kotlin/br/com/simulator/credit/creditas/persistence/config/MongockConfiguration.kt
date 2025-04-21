@@ -26,7 +26,7 @@ class MongockConfiguration {
   ): MongockInitializingBeanRunner {
     return MongockSpringboot.builder()
       .setDriver(connectionDriver)
-      .addMigrationScanPackage("br.com.simulator.credit.creditas.infrastructure.db.changelogs")
+      .addMigrationScanPackage("br.com.simulator.credit.creditas.persistence.migrations")
       .setSpringContext(applicationContext)
       .buildInitializingBeanRunner()
   }

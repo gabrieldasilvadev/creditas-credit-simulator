@@ -9,9 +9,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import org.slf4j.LoggerFactory
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationException(ex: MethodArgumentNotValidException): ResponseEntity<ErrorResponseDto> {
     val errors = ex.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "Invalid value") }
@@ -26,6 +30,7 @@ class GlobalExceptionHandler {
         fieldErrors = errors,
       )
 
+    logger.error("Validation error: ${errorResponse.fieldErrors}", ex)
     return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
   }
 
@@ -43,6 +48,7 @@ class GlobalExceptionHandler {
         fieldErrors = errors,
       )
 
+    logger.error("Binding error: ${errorResponse.fieldErrors}", ex)
     return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
   }
 
@@ -56,6 +62,8 @@ class GlobalExceptionHandler {
         message = ex.message ?: "Illegal argument",
         path = "unknown",
       )
+
+    logger.error("Illegal argument error: ${errorResponse.message}", ex)
     return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
   }
 
@@ -69,6 +77,8 @@ class GlobalExceptionHandler {
         message = ex.message ?: "Unexpected error",
         path = "unknown",
       )
+
+    logger.error("Internal server error: ${errorResponse.message}", ex)
     return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
   }
 }
