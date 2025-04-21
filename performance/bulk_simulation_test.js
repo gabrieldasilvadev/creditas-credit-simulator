@@ -2,7 +2,6 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
-// Parametrização via ENV com valores padrão
 export let options = {
   vus: parseInt(__ENV.VUS || '1', 10),
   iterations: parseInt(__ENV.ITERATIONS || '1', 10),
