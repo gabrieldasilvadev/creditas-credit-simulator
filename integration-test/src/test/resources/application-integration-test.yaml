@@ -3,12 +3,7 @@ spring:
     name: credit-simulator
   data:
     mongodb:
-      uri: mongodb://localhost:27017/credit-test
-      connect-timeout: 5000
-      socket-timeout: 5000
-      max-wait-time: 5000
-      min-connections-per-host: 5
-      max-connections-per-host: 20
+      uri: mongodb://root:rootpass@localhost:37017/testdb?authSource=admin
 
   cloud:
     aws:

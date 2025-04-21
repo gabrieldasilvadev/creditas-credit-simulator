@@ -5,7 +5,6 @@ import br.com.simulator.credit.creditas.commondomain.ports.EventPublisher
 import br.com.simulator.credit.creditas.infrastructure.CorrelationInterceptor.Companion.CORRELATION_ID
 import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.util.UUID
 import org.slf4j.MDC
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Recover
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.sns.SnsClient
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
+import java.util.UUID
 
 @Component
 @Monitorable
@@ -43,11 +43,12 @@ class SnsEventPublisher(
         .message(message)
         .messageAttributes(
           mapOf(
-            CORRELATION_ID to MessageAttributeValue.builder()
-              .dataType("String")
-              .stringValue(correlationId)
-              .build()
-          )
+            CORRELATION_ID to
+              MessageAttributeValue.builder()
+                .dataType("String")
+                .stringValue(correlationId)
+                .build(),
+          ),
         )
         .build()
 

@@ -264,6 +264,16 @@ components:
         details:
           type: object
           description: Campo opcional com informações detalhadas do erro
+        status:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
       required:
         - type
         - message
+        - status
+        - timestamp
+        - path

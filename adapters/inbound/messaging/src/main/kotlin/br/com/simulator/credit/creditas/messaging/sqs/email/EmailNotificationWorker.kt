@@ -8,7 +8,6 @@ import br.com.simulator.credit.creditas.simulationdomain.api.events.SimulationCo
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.awspring.cloud.sqs.annotation.SqsListenerAcknowledgementMode.ON_SUCCESS
-import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.messaging.MessageHeaders
@@ -17,6 +16,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 @Monitorable
@@ -36,8 +36,9 @@ class EmailNotificationWorker(
     @Payload rawMessage: String,
     @Headers messageHeaders: MessageHeaders,
   ) {
-    val correlationId = (messageHeaders[CORRELATION_ID] as? String)
-      ?: UUID.randomUUID().toString()
+    val correlationId =
+      (messageHeaders[CORRELATION_ID] as? String)
+        ?: UUID.randomUUID().toString()
     MDC.put(CORRELATION_ID, correlationId)
 
     logger.info("Receiving message from SQS: $rawMessage")

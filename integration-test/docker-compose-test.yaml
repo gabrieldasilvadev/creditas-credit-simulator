@@ -3,8 +3,11 @@ services:
   mongo:
     image: mongo:6.0.13
     ports:
-      - "27017:27017"
+      - "37017:27017"
     environment:
+      - MONGO_INITDB_DATABASE=credit-test
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootpass
       - MONGO_INITDB_DATABASE=credit-test
     healthcheck:
       test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]

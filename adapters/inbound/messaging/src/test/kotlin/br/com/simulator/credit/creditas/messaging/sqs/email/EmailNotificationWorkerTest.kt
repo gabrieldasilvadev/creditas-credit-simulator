@@ -13,12 +13,11 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.math.BigDecimal
 import org.junit.jupiter.api.Test
 import org.springframework.messaging.MessageHeaders
+import java.math.BigDecimal
 
 internal class EmailNotificationWorkerTest {
-
   private val emailSender: EmailSender<EmailContent> = mockk(relaxed = true)
   private val objectMapper: ObjectMapper = mockk()
   private val worker = EmailNotificationWorker(emailSender, objectMapper)
@@ -29,20 +28,22 @@ internal class EmailNotificationWorkerTest {
 
     val simulationEvent =
       SimulationCompletedEvent(
-        loanSimulationData = LoanSimulationInputDataEvent(
-          email = email,
-          birthDate = "1990-01-01",
-          loanAmount = Money(BigDecimal("10000.00")),
-          currency = "BRL",
-          months = 12
-        ),
-        result = SimulationResultEvent(
-          totalPayment = Money(BigDecimal("12000.00")),
-          monthlyInstallment = Money(BigDecimal("1000.00")),
-          totalInterest = Money(BigDecimal("2000.00"))
-        ),
+        loanSimulationData =
+          LoanSimulationInputDataEvent(
+            email = email,
+            birthDate = "1990-01-01",
+            loanAmount = Money(BigDecimal("10000.00")),
+            currency = "BRL",
+            months = 12,
+          ),
+        result =
+          SimulationResultEvent(
+            totalPayment = Money(BigDecimal("12000.00")),
+            monthlyInstallment = Money(BigDecimal("1000.00")),
+            totalInterest = Money(BigDecimal("2000.00")),
+          ),
         occurredOn = System.currentTimeMillis(),
-        aggregateId = "sim-123"
+        aggregateId = "sim-123",
       )
 
     val rawJsonMessage = """{ "fake": "json" }"""

@@ -3,9 +3,6 @@ package br.com.simulator.credit.creditas.persistence.adapter
 import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationDocument
 import br.com.simulator.credit.creditas.persistence.repository.BulkSimulationMongoRepository
-import java.util.Date
-import java.util.Optional
-import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -13,6 +10,9 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Component
+import java.util.Date
+import java.util.Optional
+import java.util.UUID
 
 @Component
 @Monitorable
@@ -32,10 +32,11 @@ class BulkSimulationPersistenceAdapter(
     }
 
     logger.info("Updating bulk simulation under distributed lock: id=$bulkId")
-    val result = withMongoLock(bulkId) { lockedDoc ->
-      bulkSimulationMongoRepository.save(bulkSimulationDocument)
-        .also { logger.info("Bulk simulation document saved under lock: $it") }
-    }
+    val result =
+      withMongoLock(bulkId) { lockedDoc ->
+        bulkSimulationMongoRepository.save(bulkSimulationDocument)
+          .also { logger.info("Bulk simulation document saved under lock: $it") }
+      }
 
     if (result == null) {
       logger.warn("Could not acquire lock for bulkId=$bulkId. Skipping save.")
@@ -57,19 +58,26 @@ class BulkSimulationPersistenceAdapter(
   fun tryLockById(bulkId: UUID): Optional<BulkSimulationDocument> {
     logger.info("Trying to acquire lock for bulkId=$bulkId")
 
-    val query = Query(
-      Criteria.where("_id").`is`(bulkId)
-        .and("locked").`is`(false)
-    )
-    val update = Update()
-      .set("locked", true)
-      .set("lockedAt", Date())
-    val options = FindAndModifyOptions.options()
-      .returnNew(true)
+    val query =
+      Query(
+        Criteria.where("_id").`is`(bulkId)
+          .and("locked").`is`(false),
+      )
+    val update =
+      Update()
+        .set("locked", true)
+        .set("lockedAt", Date())
+    val options =
+      FindAndModifyOptions.options()
+        .returnNew(true)
 
-    val lockedDoc = mongoTemplate.findAndModify(
-      query, update, options, BulkSimulationDocument::class.java
-    )
+    val lockedDoc =
+      mongoTemplate.findAndModify(
+        query,
+        update,
+        options,
+        BulkSimulationDocument::class.java,
+      )
 
     return Optional.ofNullable(lockedDoc).also {
       if (it.isPresent) {
@@ -84,16 +92,17 @@ class BulkSimulationPersistenceAdapter(
     logger.info("Releasing lock for bulkId=$bulkId")
 
     val query = Query(Criteria.where("_id").`is`(bulkId))
-    val update = Update()
-      .set("locked", false)
-      .unset("lockedAt")
+    val update =
+      Update()
+        .set("locked", false)
+        .unset("lockedAt")
 
     mongoTemplate.updateFirst(query, update, BulkSimulationDocument::class.java)
   }
 
   private fun <T> withMongoLock(
     bulkId: UUID,
-    action: (BulkSimulationDocument) -> T
+    action: (BulkSimulationDocument) -> T,
   ): T? {
     val lockedOpt = tryLockById(bulkId)
     return if (lockedOpt.isPresent) {

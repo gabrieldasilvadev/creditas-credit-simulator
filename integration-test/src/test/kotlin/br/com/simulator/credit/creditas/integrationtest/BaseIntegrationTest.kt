@@ -31,7 +31,7 @@ import java.time.Duration
 abstract class BaseIntegrationTest {
   companion object {
     private const val MONGO_SERVICE = "mongo"
-    private const val MONGO_PORT = 27017
+    private const val MONGO_PORT = 37017
     private const val LOCALSTACK_SERVICE = "localstack"
     private const val LOCALSTACK_PORT = 4566
 
@@ -70,6 +70,17 @@ abstract class BaseIntegrationTest {
         logger.error("Error to initize container: ${e.message} | cause: ${e.cause}")
         e.printStackTrace()
       }
+
+      try {
+        environment.start()
+        Thread.sleep(5000)
+
+        val mongoHost = environment.getServiceHost(MONGO_SERVICE, MONGO_PORT)
+        val mongoPort = environment.getServicePort(MONGO_SERVICE, MONGO_PORT)
+        logger.info("MongoDB Available in $mongoHost:$mongoPort")
+      } catch (e: Exception) {
+        logger.error("Error to initize container: ${e.message} | cause: ${e.cause}")
+      }
     }
 
     @JvmStatic
@@ -84,10 +95,9 @@ abstract class BaseIntegrationTest {
         logger.info("MongoDB: $mongoHost:$mongoPort")
         logger.info("Localstack: $localstackHost:$localstackPort")
 
-        registry.add("spring.data.mongodb.uri") { "mongodb://$mongoHost:$mongoPort/credit-test" }
-        registry.add("spring.data.mongodb.connect-timeout") { "10000" }
-        registry.add("spring.data.mongodb.socket-timeout") { "10000" }
-        registry.add("spring.data.mongodb.max-wait-time") { "10000" }
+        registry.add("spring.data.mongodb.uri") {
+          "mongodb://root:rootpass@$mongoHost:$mongoPort/credit-test?authSource=admin"
+        }
 
         registry.add("spring.cloud.aws.endpoint") { "http://$localstackHost:$localstackPort" }
         registry.add("spring.cloud.aws.region.static") { "us-east-1" }

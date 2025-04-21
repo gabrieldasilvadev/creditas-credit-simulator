@@ -23,44 +23,52 @@ class GlobalExceptionHandler {
     val errorResponse =
       ErrorResponseDto(
         timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC),
-        status = HttpStatus.BAD_REQUEST.value(),
-        error = "Validation failed",
+        status = HttpStatus.BAD_REQUEST.name,
+        type = "Validation failed",
         message = "There are validation errors in the request",
         path = ex.parameter.method?.name ?: "unknown",
-        fieldErrors = errors,
+        details = errors,
       )
 
-    logger.error("Validation error: ${errorResponse.fieldErrors}", ex)
+    logger.error("Validation error: ${errorResponse.details}", ex)
     return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
   }
 
   @ExceptionHandler(BindException::class)
-  fun handleBindException(ex: BindException, httpServletRequest: HttpServletRequest): ResponseEntity<ErrorResponseDto> {
+  fun handleBindException(
+    ex: BindException,
+    httpServletRequest: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseDto> {
     val errors = ex.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "Invalid value") }
 
     val errorResponse =
       ErrorResponseDto(
         timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC),
-        status = HttpStatus.BAD_REQUEST.value(),
-        error = "Binding failed",
+        status = HttpStatus.BAD_REQUEST.name,
+        type = "Binding failed",
         message = "There are binding errors in the request",
         path = httpServletRequest.requestURI,
-        fieldErrors = errors,
+        details = errors,
       )
 
-    logger.error("Binding error: ${errorResponse.fieldErrors}", ex)
+    logger.error("Binding error: ${errorResponse.details}", ex)
     return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
   }
 
   @ExceptionHandler(IllegalArgumentException::class)
-  fun handleIllegalArgument(ex: IllegalArgumentException, httpServletRequest: HttpServletRequest): ResponseEntity<ErrorResponseDto> {
+  fun handleIllegalArgument(
+    ex: IllegalArgumentException,
+    httpServletRequest: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseDto> {
+    val errors = mapOf("error" to (ex.message ?: "Illegal argument"))
     val errorResponse =
       ErrorResponseDto(
         timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC),
-        status = HttpStatus.BAD_REQUEST.value(),
-        error = "Invalid argument",
+        status = HttpStatus.BAD_REQUEST.name,
+        type = "Invalid argument",
         message = ex.message ?: "Illegal argument",
         path = httpServletRequest.requestURI,
+        details = errors,
       )
 
     logger.error("Illegal argument error: ${errorResponse.message}", ex)
@@ -68,18 +76,21 @@ class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(Exception::class)
-  fun handleGenericException(ex: Exception, httpServletRequest: HttpServletRequest): ResponseEntity<ErrorResponseDto> {
+  fun handleGenericException(
+    ex: Exception,
+    httpServletRequest: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseDto> {
     val errorResponse =
       ErrorResponseDto(
         timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC),
-        status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        error = "Internal server error",
+        status = HttpStatus.INTERNAL_SERVER_ERROR.name,
+        type = "Internal server error",
         message = "Please contact support team",
         path = httpServletRequest.requestURI,
+        details = null,
       )
 
     logger.error("Internal server error: ${errorResponse.message}")
-
     return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
   }
 }

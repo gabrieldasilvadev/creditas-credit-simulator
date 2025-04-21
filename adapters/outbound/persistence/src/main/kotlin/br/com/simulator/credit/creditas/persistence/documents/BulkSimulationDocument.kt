@@ -18,6 +18,7 @@ data class BulkSimulationDocument(
   val receivedAt: LocalDateTime? = null,
   val total: Int,
   val processed: Int = 0,
+  val locked: Boolean = false,
   val results: List<BulkSimulationResponseDto> = emptyList(),
 )
 
