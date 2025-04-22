@@ -21,7 +21,7 @@ class BulkSimulationTtlIndexChangeUnit {
         .expireAfter(60, java.util.concurrent.TimeUnit.SECONDS)
         .name("ttl_lockedAt_index")
 
-    val collectionName = "bulk_simulation"
+    val collectionName = "bulkSimulationDocument"
     val indexes = database.getCollection(collectionName).listIndexes()
 
     val alreadyExists = indexes.any { it.getString("name") == "ttl_lockedAt_index" }
@@ -32,6 +32,6 @@ class BulkSimulationTtlIndexChangeUnit {
 
   @RollbackExecution
   fun rollback(database: MongoDatabase) {
-    database.getCollection("bulk_simulation").dropIndex("ttl_lockedAt_index")
+    database.getCollection("bulkSimulationDocument").dropIndex("ttl_lockedAt_index")
   }
 }

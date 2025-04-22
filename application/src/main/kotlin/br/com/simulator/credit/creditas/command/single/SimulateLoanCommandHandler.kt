@@ -11,7 +11,6 @@ import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.Cust
 import br.com.simulator.credit.creditas.simulationdomain.model.valueobjects.LoanSimulationData
 import br.com.simulator.credit.creditas.simulationdomain.service.SimulateLoanService
 import com.trendyol.kediatr.CommandWithResultHandler
-import io.github.resilience4j.bulkhead.BulkheadFullException
 import io.github.resilience4j.bulkhead.annotation.Bulkhead
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import org.slf4j.Logger
@@ -28,7 +27,7 @@ class SimulateLoanCommandHandler(
   private val logger: Logger = LoggerFactory.getLogger(SimulateLoanCommandHandler::class.java)
 
   @CircuitBreaker(name = "simulate-circuit")
-  @Bulkhead(name = "simulate-bulkhead", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "tooMany")
+  @Bulkhead(name = "simulate-bulkhead", type = Bulkhead.Type.SEMAPHORE)
   override suspend fun handle(command: SimulateLoanCommand): LoanSimulationHttpResponse {
     logger.info("Starting loan simulation: $command")
     val loanAmount = loanAmountFactory.create(command.amount, command.sourceCurrency, command.targetCurrency)
@@ -60,10 +59,5 @@ class SimulateLoanCommandHandler(
           annualInterestRate = command.interestRatePolicy.annualInterestRate(applicant).toMoney(),
         ),
     )
-  }
-
-  fun tooMany(command: SimulateLoanCommand, ex: BulkheadFullException) {
-    logger.error("Bulkhead is full, cannot process loan simulation: $command")
-    throw RuntimeException("Bulkhead is full, please try again later", ex)
   }
 }

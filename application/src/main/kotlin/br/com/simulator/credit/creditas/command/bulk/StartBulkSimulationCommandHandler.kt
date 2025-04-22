@@ -9,10 +9,10 @@ import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationStat
 import br.com.simulator.credit.creditas.shared.messages.BulkSimulationMessage
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trendyol.kediatr.CommandHandler
+import java.util.UUID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 @Monitorable
@@ -50,40 +50,41 @@ class StartBulkSimulationCommandHandler(
         )
       }
 
-    sendInBatches(command.bulkId, simulationMessages, INITIAL_BATCH_SIZE)
+    sendInBatches(command.bulkId, simulationMessages)
   }
 
   private fun sendInBatches(
     bulkId: UUID,
-    simulations: List<BulkSimulationMessage.LoanSimulationMessage>,
-    batchSize: Int,
+    simulations: List<BulkSimulationMessage.LoanSimulationMessage>
   ) {
-    if (batchSize < 1) {
-      logger.error("Batch size too small, cannot send simulations")
-      throw IllegalStateException("Cannot send simulations, individual messages exceed SQS limit")
-    }
+    val queue = ArrayDeque(listOf(simulations))
+    var batchNumber = 0
 
-    simulations.chunked(batchSize).forEachIndexed { index, batch ->
-      val message =
-        BulkSimulationMessage(
-          bulkId = bulkId,
-          simulations = batch,
-        )
+    while (queue.isNotEmpty()) {
+      val batch = queue.removeFirst()
+      val message = BulkSimulationMessage(bulkId, batch)
+      val payload = objectMapper.writeValueAsBytes(message)
+      val size = payload.size
 
-      val messageJson = objectMapper.writeValueAsString(message)
-
-      if (messageJson.length > SQS_MESSAGE_SIZE_LIMIT) {
-        logger.info("Batch size (${messageJson.length} bytes) exceeds limit, reducing size and retrying")
-        sendInBatches(bulkId, batch, batchSize / 2)
-      } else {
+      if (size <= SQS_MESSAGE_SIZE_LIMIT) {
         publisher.send(message)
-        logger.info("Sent batch ${index + 1} with ${batch.size} simulations (${messageJson.length} bytes)")
+        logger.info("Sent batch ${++batchNumber} with ${batch.size} items (${size} bytes)")
+      } else if (batch.size > 1) {
+        val mid = batch.size / 2
+        logger.warn(
+          "Payload $size bytes too big for ${batch.size} items; splitting into " +
+            "$mid and ${batch.size - mid}"
+        )
+        queue.addFirst(batch.subList(mid, batch.size))
+        queue.addFirst(batch.subList(0, mid))
+      } else {
+        logger.error("Single simulation payload $size bytes exceeds SQS limit")
+        throw IllegalStateException("Cannot send single simulation; payload too large")
       }
     }
   }
 
   companion object {
-    private const val INITIAL_BATCH_SIZE = 100
-    private const val SQS_MESSAGE_SIZE_LIMIT = 250000
+    private const val SQS_MESSAGE_SIZE_LIMIT = 256 * 1024
   }
 }

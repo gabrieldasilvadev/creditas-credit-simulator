@@ -1,26 +1,21 @@
 package br.com.simulator.credit.creditas.messaging.sqs.simulation
 
-import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto.Companion.toLoanSimulationCommandDto
 import br.com.simulator.credit.creditas.command.bulk.LoanSimulationCommandDto.Companion.toSimulateLoanCommand
 import br.com.simulator.credit.creditas.infrastructure.annotations.Monitorable
 import br.com.simulator.credit.creditas.persistence.adapter.BulkSimulationPersistenceAdapter
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationResponseDto
 import br.com.simulator.credit.creditas.persistence.documents.BulkSimulationStatus
-import br.com.simulator.credit.creditas.property.BulkSimulationProperties
 import br.com.simulator.credit.creditas.shared.messages.BulkSimulationMessage
 import br.com.simulator.credit.creditas.shared.policy.PolicyConfiguration
 import com.trendyol.kediatr.Mediator
 import io.awspring.cloud.sqs.annotation.SqsListener
-import java.util.UUID
+import io.awspring.cloud.sqs.annotation.SqsListenerAcknowledgementMode.MANUAL
+import io.awspring.cloud.sqs.listener.acknowledgement.Acknowledgement
 import java.util.concurrent.atomic.AtomicInteger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -29,84 +24,63 @@ import org.springframework.stereotype.Component
 class BulkSimulationListener(
   private val repository: BulkSimulationPersistenceAdapter,
   private val mediator: Mediator,
-  private val policyConfiguration: PolicyConfiguration,
-  private val bulkSimulationProperties: BulkSimulationProperties,
+  private val policyConfiguration: PolicyConfiguration
 ) {
-  private val logger = LoggerFactory.getLogger(this::class.java)
+  private val logger = LoggerFactory.getLogger(BulkSimulationListener::class.java)
 
-  @SqsListener("\${cloud.aws.sqs.queues.bulkSimulationQueue}")
-  fun onMessage(message: BulkSimulationMessage) =
-    runBlocking {
-      processMessage(message)
-    }
-
-  private suspend fun processMessage(message: BulkSimulationMessage) =
-    coroutineScope {
-      logger.info("Processing bulk simulation message: $message")
-      val processedCount = AtomicInteger(0)
-      val total = message.simulations.size
-
-      message.simulations
-        .chunked(bulkSimulationProperties.size)
-        .asFlow()
-        .buffer(bulkSimulationProperties.buffer)
-        .collect { chunk ->
-          chunk.map { simulation ->
-            async(Dispatchers.IO) {
-              process(
-                simulation.toLoanSimulationCommandDto(simulation.policyType),
-                message.bulkId,
-                processedCount,
-                total,
-              )
-            }
-          }.awaitAll()
-        }
-    }
-
-  private suspend fun process(
-    request: LoanSimulationCommandDto,
-    bulkId: UUID,
-    processedCount: AtomicInteger,
-    total: Int,
+  @OptIn(DelicateCoroutinesApi::class)
+  @SqsListener(
+    "\${cloud.aws.sqs.queues.bulkSimulationQueue}",
+    acknowledgementMode = MANUAL
+  )
+  fun onMessage(
+    message: BulkSimulationMessage,
+    acknowledgment: Acknowledgement
   ) {
-    val document = repository.findById(bulkId).orElseThrow()
+    GlobalScope.launch {
+      try {
+        processMessage(message)
+        acknowledgment.acknowledge()
+        logger.info("Message acknowledged (bulkId=${message.bulkId})")
+      } catch (ex: Exception) {
+        logger.error(
+          "Processing failed for bulkId=${message.bulkId}, message will remain in the queue: ${ex.message}",
+          ex
+        )
+      }
+    }
+  }
 
-    try {
-      val interestRatePolicy = policyConfiguration.resolve(request.policyType)
-      val result = mediator.send(request.toSimulateLoanCommand(interestRatePolicy))
+  private suspend fun processMessage(message: BulkSimulationMessage) {
+    logger.info("Processing bulk simulation: $message")
+    val processedCount = AtomicInteger(0)
+    val total = message.simulations.size
 
-      repository.save(
-        document.copy(
-          processed = processedCount.incrementAndGet(),
-          status =
-            if (processedCount.get() >= total) {
-              BulkSimulationStatus.COMPLETED
-            } else {
-              BulkSimulationStatus.PROCESSING
-            },
-          results =
-            document.results +
-              listOf(
-                BulkSimulationResponseDto(
-                  source = BulkSimulationResponseDto.Source(amount = request.loanAmount),
-                  target =
-                    BulkSimulationResponseDto.Target(
-                      convertedAmount = result.target.convertedAmount,
-                      totalPayment = result.target.totalPayment,
-                      monthlyInstallment = result.target.monthlyInstallment,
-                      totalInterest = result.target.totalInterest,
-                      annualInterestRate = result.target.annualInterestRate,
-                    ),
-                ),
-              ),
-        ),
-      )
+    message.simulations.forEach { sim ->
+      val request = sim.toLoanSimulationCommandDto(sim.policyType)
+      try {
+        val policy = policyConfiguration.resolve(request.policyType)
+        val result = mediator.send(request.toSimulateLoanCommand(policy))
 
-      logger.info("Processed simulation: $request")
-    } catch (ex: Exception) {
-      logger.error("Error processing simulation from queue: ${ex.message}", ex)
-      repository.save(document.copy(status = BulkSimulationStatus.FAILED))
+        val count = processedCount.incrementAndGet()
+        val isLast = count >= total
+        val dto = BulkSimulationResponseDto(
+          source = BulkSimulationResponseDto.Source(amount = request.loanAmount),
+          target = BulkSimulationResponseDto.Target(
+            convertedAmount = result.target.convertedAmount,
+            totalPayment = result.target.totalPayment,
+            monthlyInstallment = result.target.monthlyInstallment,
+            totalInterest = result.target.totalInterest,
+            annualInterestRate = result.target.annualInterestRate
+          )
+        )
+
+        repository.updateIncrementAndPushResult(message.bulkId, dto, isLast)
+        logger.info("Processed simulation #${count}/$total for bulkId=${message.bulkId}")
+      } catch (ex: Exception) {
+        logger.error("Error processing simulation for bulkId=${message.bulkId}: ${ex.message}", ex)
+        repository.updateStatus(message.bulkId, BulkSimulationStatus.FAILED)
+      }
     }
   }
 }
