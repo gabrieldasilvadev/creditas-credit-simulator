@@ -12,6 +12,9 @@ import br.com.simulator.credit.creditas.shared.messages.BulkSimulationMessage
 import br.com.simulator.credit.creditas.shared.policy.PolicyConfiguration
 import com.trendyol.kediatr.Mediator
 import io.awspring.cloud.sqs.annotation.SqsListener
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -20,8 +23,6 @@ import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 @Monitorable
@@ -51,7 +52,7 @@ class BulkSimulationListener(
         .buffer(bulkSimulationProperties.buffer)
         .collect { chunk ->
           chunk.map { simulation ->
-            async {
+            async(Dispatchers.IO) {
               process(
                 simulation.toLoanSimulationCommandDto(simulation.policyType),
                 message.bulkId,
