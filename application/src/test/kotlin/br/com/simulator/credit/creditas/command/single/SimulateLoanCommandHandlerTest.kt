@@ -1,6 +1,5 @@
 package br.com.simulator.credit.creditas.command.single
 
-import br.com.simulator.credit.creditas.command.SimulationSemaphoreProvider
 import br.com.simulator.credit.creditas.command.dto.LoanSimulationHttpResponse.Source
 import br.com.simulator.credit.creditas.command.dto.LoanSimulationHttpResponse.Target
 import br.com.simulator.credit.creditas.command.factory.LoanAmountFactory
@@ -34,7 +33,6 @@ internal class SimulateLoanCommandHandlerTest {
   private val publisher = mockk<DomainEventPublisher>(relaxed = true)
   private val loanAmountFactory = mockk<LoanAmountFactory>()
   private val persistencePort = mockk<SimulationPersistencePort>()
-  private val simulationSemaphoreProvider = mockk<SimulationSemaphoreProvider>(relaxed = true)
 
   private lateinit var handler: SimulateLoanCommandHandler
 
@@ -45,7 +43,6 @@ internal class SimulateLoanCommandHandlerTest {
         publisher,
         loanAmountFactory,
         persistencePort,
-        simulationSemaphoreProvider,
       )
   }
 
