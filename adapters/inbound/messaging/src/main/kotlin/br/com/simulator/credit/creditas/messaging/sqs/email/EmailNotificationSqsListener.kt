@@ -20,7 +20,7 @@ import java.util.UUID
 
 @Component
 @Monitorable
-class EmailNotificationWorker(
+class EmailNotificationSqsListener(
   private val emailSender: EmailSender<EmailContent>,
   private val objectMapper: ObjectMapper,
 ) {

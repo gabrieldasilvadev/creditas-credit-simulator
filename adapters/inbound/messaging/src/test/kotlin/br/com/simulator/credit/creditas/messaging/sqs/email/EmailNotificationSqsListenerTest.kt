@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.messaging.MessageHeaders
 import java.math.BigDecimal
 
-internal class EmailNotificationWorkerTest {
+internal class EmailNotificationSqsListenerTest {
   private val emailSender: EmailSender<EmailContent> = mockk(relaxed = true)
   private val objectMapper: ObjectMapper = mockk()
-  private val worker = EmailNotificationWorker(emailSender, objectMapper)
+  private val worker = EmailNotificationSqsListener(emailSender, objectMapper)
 
   @Test
   fun `should deserialize SimulationCompletedEvent and send email`() {
