@@ -167,61 +167,61 @@ Principais características:
 ### Exemplo: Simulação Única
 
 ```bash
-    curl -X POST http://localhost:7000/simulations \
-      -H "Content-Type: application/json" \
-      -d '{
-        "loan_amount": {
-          "amount": "1000.00",
-          "currency": "USD"
-        },
-        "customer_info": {
-          "birth_date": "2003-04-15",
-          "email": "user@example.com"
-        },
-        "months": 12,
-        "policy_type": "age",
-        "source_currency": "BRL",
-        "target_currency": "USD"
-      }'
+  curl -X POST http://localhost:7000/simulations \
+    -H "Content-Type: application/json" \
+    -d '{
+      "loan_amount": {
+        "amount": "1000.00",
+        "currency": "USD"
+      },
+      "customer_info": {
+        "birth_date": "2003-04-15",
+        "email": "user@example.com"
+      },
+      "months": 12,
+      "policy_type": "age",
+      "source_currency": "BRL",
+      "target_currency": "USD"
+    }'
 ```
 
 ### Exemplo: Simulação em Lote
 
 ```bash
-    curl -X POST http://localhost:7000/simulations/bulk \
-      -H "Content-Type: application/json" \
-      -d '{
-        "simulations": [
-          {
-            "loan_amount": {
-              "amount": "10000.00",
-              "currency": "BRL"
-            },
-            "customer_info": {
-              "birth_date": "1990-01-15",
-              "email": "cliente1@example.com"
-            },
-            "months": 12,
-            "policy_type": "fixed",
-            "source_currency": "BRL",
-            "target_currency": "USD"
+  curl -X POST http://localhost:7000/simulations/bulk \
+    -H "Content-Type: application/json" \
+    -d '{
+      "simulations": [
+        {
+          "loan_amount": {
+            "amount": "10000.00",
+            "currency": "BRL"
           },
-          {
-            "loan_amount": {
-              "amount": "5000.00",
-              "currency": "BRL"
-            },
-            "customer_info": {
-              "birth_date": "2002-05-20",
-              "email": "cliente2@example.com"
-            },
-            "months": 24,
-            "policy_type": "age",
-            "source_currency": "BRL",
-            "target_currency": "BRL"
-          }
-        ]
-      }'
+          "customer_info": {
+            "birth_date": "1990-01-15",
+            "email": "cliente1@example.com"
+          },
+          "months": 12,
+          "policy_type": "fixed",
+          "source_currency": "BRL",
+          "target_currency": "USD"
+        },
+        {
+          "loan_amount": {
+            "amount": "5000.00",
+            "currency": "BRL"
+          },
+          "customer_info": {
+            "birth_date": "2002-05-20",
+            "email": "cliente2@example.com"
+          },
+          "months": 24,
+          "policy_type": "age",
+          "source_currency": "BRL",
+          "target_currency": "BRL"
+        }
+      ]
+    }'
 ```
 
 Resposta inicial:
