@@ -68,15 +68,6 @@ resilience4j:
         failure-rate-threshold: 50
         wait-duration-in-open-state: 5s
 
-  retry:
-    instances:
-      simulate-retry:
-        max-attempts: 3
-        wait-duration: 500ms
-        retry-exceptions:
-          - java.io.IOException
-          - java.util.concurrent.TimeoutException
-
   bulkhead:
     instances:
       simulate-bulkhead:

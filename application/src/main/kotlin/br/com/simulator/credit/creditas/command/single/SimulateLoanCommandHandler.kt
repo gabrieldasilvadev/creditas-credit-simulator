@@ -14,7 +14,6 @@ import com.trendyol.kediatr.CommandWithResultHandler
 import io.github.resilience4j.bulkhead.BulkheadFullException
 import io.github.resilience4j.bulkhead.annotation.Bulkhead
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
-import io.github.resilience4j.retry.annotation.Retry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -28,7 +27,6 @@ class SimulateLoanCommandHandler(
 ) : CommandWithResultHandler<SimulateLoanCommand, LoanSimulationHttpResponse> {
   private val logger: Logger = LoggerFactory.getLogger(SimulateLoanCommandHandler::class.java)
 
-  @Retry(name = "simulate-retry")
   @CircuitBreaker(name = "simulate-circuit")
   @Bulkhead(name = "simulate-bulkhead", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "tooMany")
   override suspend fun handle(command: SimulateLoanCommand): LoanSimulationHttpResponse {
