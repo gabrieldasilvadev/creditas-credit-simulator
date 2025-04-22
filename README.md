@@ -48,14 +48,14 @@ Principais características:
 ## ⚙️ Instalação
 
 1. Clone o repositório:
-   ```bash
-   git clone https://github.com/gabrieldasilvadev/creditas-credit-simulator.git
-   cd creditas-credit-simulator
-   ```
+```bash
+git clone https://github.com/gabrieldasilvadev/creditas-credit-simulator.git
+cd creditas-credit-simulator
+```
 2. Compile o projeto:
-   ```bash
-   ./gradlew clean build
-   ```
+```bash
+./gradlew clean build
+```
 
 ---
 
@@ -64,17 +64,17 @@ Principais características:
 #### Rodando localmente (Java + MongoDB)
 
 1. Preparar o ambiente para LocalStack (AWS emulado) e MongoDB:
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+docker-compose up -d
+```
 2. Configure a infraestrutura no LocalStack:
-   ```bash
-   make setup
-   ```
+```bash
+make setup
+```
 3. Inicie o projeto
-   ```bash
-   gradlew :container:bootRun
-   ```
+```bash
+gradlew :container:bootRun
+```
 
 4. Acesse o Swagger UI em:
 
@@ -84,50 +84,50 @@ Principais características:
 
 1. Inicie o Minikube:
 ```bash
-    minikube start
+minikube start
 ```
 
 2. Construir o LocalStack:
 ```bash
-    kubectl apply -f k8s/localstack-deployment.yaml
-    kubectl rollout status deployment/localstack --timeout=120s
-    kubectl get pods -l app=localstack -w
+kubectl apply -f k8s/localstack-deployment.yaml
+kubectl rollout status deployment/localstack --timeout=120s
+kubectl get pods -l app=localstack -w
 ```
 
 3. Execute o job de configuração do LocalStack:
 ```bash
-    kubectl apply -f k8s/localstack-setup-job.yaml
-    kubectl logs job/localstack-setup-job -f
+kubectl apply -f k8s/localstack-setup-job.yaml
+kubectl logs job/localstack-setup-job -f
 ```
 
 4. Construa a imagem do MongoDB:
  ```bash
-    kubectl apply -f k8s/mongodb-deployment.yaml
-    kubectl rollout status deployment/mongodb --timeout=120s
+kubectl apply -f k8s/mongodb-deployment.yaml
+kubectl rollout status deployment/mongodb --timeout=120s
 ```
 
 5. Construa a imagem do simulador de crédito
 ```bash
-    docker build -t credit-simulator:latest -f Dockerfile .
-    minikube image load credit-simulator:latest
+docker build -t credit-simulator:latest -f Dockerfile .
+minikube image load credit-simulator:latest
 ```
 
 6. Aplique o deployment do simulador de crédito
 ```bash
-    kubectl apply -f k8s/credit-simulator-deployment.yaml
-    kubectl rollout status deployment/credit-simulator --timeout=120s
-    kubectl get pods -l app=credit-simulator -w
+kubectl apply -f k8s/credit-simulator-deployment.yaml
+kubectl rollout status deployment/credit-simulator --timeout=120s
+kubectl get pods -l app=credit-simulator -w
 ```
 
 7. Exponha os serviços:
 ```bash
-    kubectl port-forward svc/credit-simulator 7000:7000
-    kubectl port-forward svc/mongodb 27017:27017
+kubectl port-forward svc/credit-simulator 7000:7000
+kubectl port-forward svc/mongodb 27017:27017
 ```
 
 8. Verifique os pods:
 ```bash
-    kubectl get pods
+kubectl get pods
 ```
 
 ---
@@ -135,24 +135,24 @@ Principais características:
 ## 🔬 Testes
 
 - **Unitários** (JUnit + Mockito + Testcontainers):
-  ```bash
-  ./gradlew test
-  ```
+```bash
+./gradlew test
+```
 - **Integração** (Testcontainers):
-  ```bash
-  ./gradlew :integrationTest:test
-  ```
+```bash
+./gradlew :integrationTest:test
+```
 - **Performance com K6**:
 
-  Simulação única:
-  ```bash
-  k6 run ./load-test-simulations.js --env VUS=100 --env ITERATIONS=1000000
-  ```
+Simulação única:
+```bash
+k6 run ./load-test-simulations.js --env VUS=100 --env ITERATIONS=1000000
+```
 
   Simulação em lote:
-  ```bash
-  k6 run ./load-test-simulations-bulk.js --env SIMULATIONS=10000 --env VUS=1 --env ITERATIONS=1
-  ```
+```bash
+k6 run ./load-test-simulations-bulk.js --env SIMULATIONS=10000 --env VUS=1 --env ITERATIONS=1
+```
 
 ---
 
@@ -167,61 +167,61 @@ Principais características:
 ### Exemplo: Simulação Única
 
 ```bash
-  curl -X POST http://localhost:7000/simulations \
-    -H "Content-Type: application/json" \
-    -d '{
-      "loan_amount": {
-        "amount": "1000.00",
-        "currency": "USD"
-      },
-      "customer_info": {
-        "birth_date": "2003-04-15",
-        "email": "user@example.com"
-      },
-      "months": 12,
-      "policy_type": "age",
-      "source_currency": "BRL",
-      "target_currency": "USD"
-    }'
+curl -X POST http://localhost:7000/simulations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan_amount": {
+      "amount": "1000.00",
+      "currency": "USD"
+    },
+    "customer_info": {
+      "birth_date": "2003-04-15",
+      "email": "user@example.com"
+    },
+    "months": 12,
+    "policy_type": "age",
+    "source_currency": "BRL",
+    "target_currency": "USD"
+  }'
 ```
 
 ### Exemplo: Simulação em Lote
 
 ```bash
-  curl -X POST http://localhost:7000/simulations/bulk \
-    -H "Content-Type: application/json" \
-    -d '{
-      "simulations": [
-        {
-          "loan_amount": {
-            "amount": "10000.00",
-            "currency": "BRL"
-          },
-          "customer_info": {
-            "birth_date": "1990-01-15",
-            "email": "cliente1@example.com"
-          },
-          "months": 12,
-          "policy_type": "fixed",
-          "source_currency": "BRL",
-          "target_currency": "USD"
+curl -X POST http://localhost:7000/simulations/bulk \
+  -H "Content-Type: application/json" \
+  -d '{
+    "simulations": [
+      {
+        "loan_amount": {
+          "amount": "10000.00",
+          "currency": "BRL"
         },
-        {
-          "loan_amount": {
-            "amount": "5000.00",
-            "currency": "BRL"
-          },
-          "customer_info": {
-            "birth_date": "2002-05-20",
-            "email": "cliente2@example.com"
-          },
-          "months": 24,
-          "policy_type": "age",
-          "source_currency": "BRL",
-          "target_currency": "BRL"
-        }
-      ]
-    }'
+        "customer_info": {
+          "birth_date": "1990-01-15",
+          "email": "cliente1@example.com"
+        },
+        "months": 12,
+        "policy_type": "fixed",
+        "source_currency": "BRL",
+        "target_currency": "USD"
+      },
+      {
+        "loan_amount": {
+          "amount": "5000.00",
+          "currency": "BRL"
+        },
+        "customer_info": {
+          "birth_date": "2002-05-20",
+          "email": "cliente2@example.com"
+        },
+        "months": 24,
+        "policy_type": "age",
+        "source_currency": "BRL",
+        "target_currency": "BRL"
+      }
+    ]
+  }'
 ```
 
 Resposta inicial:
