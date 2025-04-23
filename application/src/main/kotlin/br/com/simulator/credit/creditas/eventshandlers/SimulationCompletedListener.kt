@@ -17,8 +17,8 @@ class SimulationCompletedListener(
 
   @EventListener
   fun handler(event: SimulationCompletedEvent) {
-    logger.info("[SimulationCompletedListener] E-MAIL received: $event")
+    logger.info("Handling simulation completed event: $event")
     snsEventPublisher.publish(event, topic)
-    logger.info("E-MAIL published: $event")
+    logger.info("Simulation completed event published. Topic: $topic | Event: $event")
   }
 }
