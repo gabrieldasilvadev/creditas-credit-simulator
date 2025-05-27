@@ -61,7 +61,7 @@ cd creditas-credit-simulator
 
 ## 🔧 Configuração e Execução
 
-#### Rodando localmente (Java + MongoDB)
+#### Rodando localmente (Kotlin + MongoDB)
 
 1. Preparar o ambiente para LocalStack (AWS emulado) e MongoDB:
 ```bash
