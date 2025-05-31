@@ -15,6 +15,7 @@ class Simulation private constructor(
   val months: Months,
   val monthlyRate: BigDecimal,
 ) : DomainObject() {
+
   fun calculate(): SimulationResult {
     val monthlyInstallment = loanAmount.monthlyInstallment(monthlyRate, months)
     val total = monthlyInstallment * months.asBigDecimal

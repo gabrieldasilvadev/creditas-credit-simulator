@@ -95,6 +95,6 @@ internal class MoneyTest {
       assertThrows(IllegalArgumentException::class.java) {
         Money(BigDecimal("-1.00"), Currency.USD)
       }
-    assertEquals("Amount must be non-negative", exception.message)
+    assertEquals("Loan amount must be greater than zero.", exception.message)
   }
 }

@@ -36,10 +36,89 @@ internal class LoanAmountTest {
   }
 
   @Test
+  fun `should calculate monthly installment for longer term (24 months)`() {
+    val loan = LoanAmount(Money(BigDecimal("10000.00"), Currency.BRL))
+    val months = Months(24)
+    val monthlyRate = BigDecimal("0.01")
+    val result = loan.monthlyInstallment(monthlyRate, months)
+
+    val expected = BigDecimal("470.73")
+    val rounded = result.amount.setScale(2, RoundingMode.HALF_EVEN)
+
+    assertEquals(expected, rounded)
+    assertEquals(Currency.BRL, result.currency)
+  }
+
+  @Test
+  fun `should calculate monthly installment for shorter term (6 months)`() {
+    val loan = LoanAmount(Money(BigDecimal("10000.00"), Currency.BRL))
+    val months = Months(6)
+    val monthlyRate = BigDecimal("0.01")
+    val result = loan.monthlyInstallment(monthlyRate, months)
+
+    val expected = BigDecimal("1725.48")
+    val rounded = result.amount.setScale(2, RoundingMode.HALF_EVEN)
+
+    assertEquals(expected, rounded)
+    assertEquals(Currency.BRL, result.currency)
+  }
+
+  @Test
+  fun `should calculate monthly installment with higher interest rate`() {
+    val loan = LoanAmount(Money(BigDecimal("10000.00"), Currency.BRL))
+    val months = Months(12)
+    val monthlyRate = BigDecimal("0.02")
+    val result = loan.monthlyInstallment(monthlyRate, months)
+
+    val expected = BigDecimal("945.60")
+    val rounded = result.amount.setScale(2, RoundingMode.HALF_EVEN)
+
+    assertEquals(expected, rounded)
+    assertEquals(Currency.BRL, result.currency)
+  }
+
+  @Test
+  fun `should calculate monthly installment with very low interest rate`() {
+    val loan = LoanAmount(Money(BigDecimal("10000.00"), Currency.BRL))
+    val months = Months(12)
+    val monthlyRate = BigDecimal("0.001")
+    val result = loan.monthlyInstallment(monthlyRate, months)
+
+    val expected = BigDecimal("838.84")
+    val rounded = result.amount.setScale(2, RoundingMode.HALF_EVEN)
+
+    assertEquals(expected, rounded)
+    assertEquals(Currency.BRL, result.currency)
+  }
+
+  @Test
+  fun `should calculate monthly installment for different loan amount`() {
+    val loan = LoanAmount(Money(BigDecimal("5000.00"), Currency.BRL))
+    val months = Months(12)
+    val monthlyRate = BigDecimal("0.01")
+    val result = loan.monthlyInstallment(monthlyRate, months)
+
+    val expected = BigDecimal("444.24")
+    val rounded = result.amount.setScale(2, RoundingMode.HALF_EVEN)
+
+    assertEquals(expected, rounded)
+    assertEquals(Currency.BRL, result.currency)
+  }
+
+  @Test
   fun `should reject zero amount`() {
     val exception =
       assertThrows(IllegalArgumentException::class.java) {
         LoanAmount(Money(BigDecimal.ZERO, Currency.BRL))
+      }
+    assertEquals("Loan amount must be greater than zero.", exception.message)
+  }
+
+  @Test
+  fun `should reject negative amount`() {
+    val exception =
+      assertThrows(IllegalArgumentException::class.java) {
+        LoanAmount(Money(BigDecimal("-100.00"), Currency.BRL))
       }
     assertEquals("Loan amount must be greater than zero.", exception.message)
   }

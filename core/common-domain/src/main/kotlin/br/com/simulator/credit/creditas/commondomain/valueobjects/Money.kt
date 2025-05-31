@@ -18,7 +18,7 @@ data class Money(
 
   init {
     require(amount >= BigDecimal.ZERO) {
-      "Amount must be non-negative"
+      "Loan amount must be greater than zero."
     }
   }
 

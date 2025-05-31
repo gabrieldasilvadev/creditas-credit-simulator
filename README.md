@@ -26,8 +26,7 @@ Principais características:
 
 - [Pré-requisitos](#-pré-requisitos)
 - [Instalação](#-instalação)
-- [Configuração](#-configuração)
-- [Execução](#-execução)
+- [Configuração](#-configuração-e-execução)
 - [Testes](#-testes)
 - [Endpoints](#-endpoints)
 - [Arquitetura](#-arquitetura)
@@ -79,6 +78,11 @@ gradlew :container:bootRun
 4. Acesse o Swagger UI em:
 
    http://localhost:7000/swagger-ui/index.html
+
+5. Ativar feature toggle para envio do email
+```bash
+feature.toggle.send-email=true
+ ```
 
 ### 🛳️ Kubernetes com Minikube (opcional)
 
@@ -158,11 +162,11 @@ k6 run ./load-test-simulations-bulk.js --env SIMULATIONS=10000 --env VUS=1 --env
 
 ## 📌 Endpoints
 
-| Método | Rota                | Descrição                           |
-|--------|---------------------|-------------------------------------|
-| POST   | `/simulations`      | Simulação de empréstimo único       |
-| POST   | `/simulations/bulk` | Simulação em lote (alta volumetria) |
-| GET    | `/simulations/{id}` | Consulta status/saldo de simulação  |
+| Método | Rota                     | Descrição                           |
+|--------|--------------------------|-------------------------------------|
+| POST   | `/simulations`           | Simulação de empréstimo único       |
+| POST   | `/simulations/bulk`      | Simulação em lote (alta volumetria) |
+| GET    | `/simulations/bulk/{id}` | Consultar de simulação em lote      |
 
 ### Exemplo: Simulação Única
 
