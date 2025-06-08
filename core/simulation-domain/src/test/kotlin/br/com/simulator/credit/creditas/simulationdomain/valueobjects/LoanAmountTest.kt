@@ -84,7 +84,7 @@ internal class LoanAmountTest {
     val monthlyRate = BigDecimal("0.001")
     val result = loan.monthlyInstallment(monthlyRate, months)
 
-    val expected = BigDecimal("838.84")
+    val expected = BigDecimal("838.76")
     val rounded = result.amount.setScale(2, RoundingMode.HALF_EVEN)
 
     assertEquals(expected, rounded)

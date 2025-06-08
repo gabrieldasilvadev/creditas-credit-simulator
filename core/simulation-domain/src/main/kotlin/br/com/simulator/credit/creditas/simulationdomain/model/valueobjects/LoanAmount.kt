@@ -33,11 +33,6 @@ data class LoanAmount(
       return Money(monthly, value.currency)
     }
 
-    if (monthlyRate.compareTo(BigDecimal("0.001")) == 0 &&
-        value.amount.compareTo(BigDecimal("10000.00")) == 0 &&
-        months.value == 12) {
-      return Money(BigDecimal("838.84"), value.currency)
-    }
 
     val installment = numerator.divide(denominator, AMOUNT_SCALE, RoundingMode.HALF_EVEN)
 
